@@ -1,0 +1,5 @@
+[wrap-git]
+directory=libwebsockets
+url=https://github.com/warmcat/libwebsockets.git
+revision=v3.1-stable
+clone_depth=1
