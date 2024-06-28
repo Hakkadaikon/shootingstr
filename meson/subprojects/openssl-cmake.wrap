@@ -1,0 +1,5 @@
+[wrap-git]
+directory=openssl-cmake
+url=https://github.com/viaduck/openssl-cmake.git
+revision=v3
+clone_depth=1

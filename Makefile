@@ -7,20 +7,26 @@
 #------------------------------------------------------------------------------
 # Build options
 #------------------------------------------------------------------------------
-.PHONY: clean setup build format
+.PHONY: clean setup build docker-prune docker-build format
 
 clean:
 	@rm -rf \
 		build \
 		meson/subprojects/yyjson \
-		meson/subprojects/libhv  \
-		meson/subprojects/rocksdb
+		meson/subprojects/libwebsockets \
+		meson/subprojects/openssl-cmake
 
 setup: clean
 	meson setup meson build
 
 build:
 	ninja -C build
+
+docker-prune:
+	docker system prune --volumes
+
+docker-build:
+	docker build . | tee build.log
 
 # format (use clang)
 format:
