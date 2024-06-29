@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------
 # Build options
 #------------------------------------------------------------------------------
-.PHONY: clean setup build docker-prune docker-build format
+.PHONY: clean setup-libwebsockets setup build docker-prune docker-build format
 
 clean:
 	@rm -rf \
@@ -15,6 +15,15 @@ clean:
 		meson/subprojects/yyjson \
 		meson/subprojects/libwebsockets \
 		meson/subprojects/openssl-cmake
+
+setup-libwebsockets:
+     git clone https://github.com/warmcat/libwebsockets.git
+     cd libwebsockets
+     git checkout refs/tags/v4.3.3
+     ENV CMAKE_C_FLAGS="-Wno-implicit-function-declaration -Wno-unused-parameter -Wno-pedantic"
+     cmake . -B build && \
+     cd build && 
+     make -j 8
 
 setup: clean
 	meson setup meson build
