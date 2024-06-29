@@ -1,4 +1,5 @@
 #include <libwebsockets.h>
+#include <yyjson.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -40,7 +41,7 @@ static struct lws_protocols protocols[] = {
     {NULL, NULL, 0, 0} /* terminator */
 };
 
-int main(void)
+int main(int argc, char** argv)
 {
     struct lws_context_creation_info info;
     struct lws_context*              context;

@@ -5,6 +5,7 @@ project(
   'c',
   default_options : [
     'warning_level=3',
+    'c_std=c23'
   ]
 )
 # -----------------------------------------------------------------
@@ -12,7 +13,12 @@ project(
 # yyjson install
 # -----------------------------------------------------------------
 cmake = import('cmake')
-yyjson_subproject = cmake.subproject('yyjson')
+yyjson_options = cmake.subproject_options()
+yyjson_options.add_cmake_defines({
+  'CMAKE_C_COMPILER': 'gcc'
+})
+
+yyjson_subproject = cmake.subproject('yyjson', options: yyjson_options)
 yyjson_dep = yyjson_subproject.dependency('yyjson')
 # -----------------------------------------------------------------
 
@@ -41,7 +47,8 @@ libwebsockets_options.add_cmake_defines({
   'LWS_WITHOUT_TESTAPPS': 'ON',
   'LWS_WITHOUT_TEST_SERVER': 'ON',
   'LWS_WITHOUT_TEST_CLIENT': 'ON',
-  'LWS_WITH_NO_LOGS': 'ON'
+  'LWS_WITH_NO_LOGS': 'ON',
+  'CMAKE_INSTALL_PREFIX': '/usr/include'
 })
 
 #'LWS_WITH_ZLIB': 'ON',

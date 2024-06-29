@@ -16,6 +16,7 @@ RUN apt-get -y install libssl-dev openssl
 # Install cmake
 RUN apt-get -y remove cmake
 ENV CMAKE_PKG_URL=https://cmake.org/files/v3.30/cmake-3.30.0-rc4-linux-x86_64.sh
+# If use openssl-cmake, you must use an older version of cmake to build.
 #ENV CMAKE_PKG_URL=https://cmake.org/files/v3.18/cmake-3.18.4-Linux-x86_64.sh
 RUN wget ${CMAKE_PKG_URL}
 RUN sh $(basename ${CMAKE_PKG_URL}) --prefix=/usr/local --exclude-subdir
