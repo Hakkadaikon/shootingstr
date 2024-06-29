@@ -1,20 +1,30 @@
 FROM ubuntu:24.04
 
+ENV DEBIAN_FRONTEND noninteractive
+
 # Install related packages
 RUN --mount=type=cache,target=/var/lib/apt/lists \
     --mount=type=cache,target=/var/cache/apt \
     apt-get -y update && \
     apt-get -y upgrade && \
-    apt-get -y install --no-install-recommends make wget zip unzip git libc6-dev dpkg-dev libssl-dev openssl && \
-    apt-get -y purge cmake
+    apt-get -y install --no-install-recommends make wget zip unzip git libc6-dev dpkg-dev libssl-dev openssl
 
-# Set default gcc g++
-ARG CC "gcc-14"
-ARG CXX "g++-14"
+# Set default gcc
+ARG GCC=gcc-14
 RUN --mount=type=cache,target=/var/lib/apt/lists \
     --mount=type=cache,target=/var/cache/apt \
-    apt-get -y install --no-install-recommends ${CC} ${CXX}&& \
-    gcc --version && \
+    apt-get -y install --no-install-recommends ${GCC} && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/${GCC} 99 && \
+    update-alternatives --auto gcc && \
+    gcc --version
+
+# Set default g++
+ARG GPP=g++-14
+RUN --mount=type=cache,target=/var/lib/apt/lists \
+    --mount=type=cache,target=/var/cache/apt \
+    apt-get -y install --no-install-recommends ${GPP} && \
+    update-alternatives --install /usr/bin/g++ g++ /usr/bin/${GPP} 99 && \
+    update-alternatives --auto g++ && \
     g++ --version
 
 #ARG CMAKE_PKG_URL=https://cmake.org/files/v3.18/cmake-3.18.4-Linux-x86_64.sh
