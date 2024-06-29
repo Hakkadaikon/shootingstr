@@ -6,7 +6,8 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN --mount=type=cache,target=/var/lib/apt/lists \
     --mount=type=cache,target=/var/cache/apt \
     apt-get -y update && \
-    apt-get -y install --no-install-recommends make wget zip unzip git libc6-dev dpkg-dev ca-certificates libssl-dev openssl libwebsockets-dev
+    apt-get -y install --no-install-recommends make wget zip unzip git libc6-dev dpkg-dev ca-certificates libssl-dev openssl libwebsockets-dev && \
+    apt-get remove -y libwebsockets-dev
 
 # Set default gcc
 ARG GCC=gcc-14
@@ -54,6 +55,13 @@ COPY ./meson    /app/meson
 COPY ./Makefile /app/Makefile
 
 WORKDIR /app
+
+ENV CMAKE_C_FLAGS "-Wno-implicit-function-declaration -Wno-unused-parameter -Wno-pedantic"
+RUN git clone https://github.com/warmcat/libwebsockets.git && \
+     cd libwebsockets && \
+     git checkout refs/tags/v4.3.3 && \
+     cmake . -B build && \
+     cd build && make -j 4 && make install
 
 # Build
 RUN make setup && make build
