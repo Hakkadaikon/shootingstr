@@ -39,14 +39,7 @@ yyjson_dep = yyjson_subproject.dependency('yyjson')
 
 # libwebsockets install
 # -----------------------------------------------------------------
-libwebsockets_dep = declare_dependency(
-  include_directories: [
-    include_directories('../libwebsockets/include')
-  ],
-  link_with: [
-     library('websockets', '../libwebsockets/bin/lib')
-  ]
-)
+libwebsockets_dep = dependency('libwebsockets')
 # -----------------------------------------------------------------
 
 sources = ['../src/main.c']
