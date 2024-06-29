@@ -51,7 +51,6 @@ executable(
     '-Wno-unused-parameter'
   ],
   link_args : [
-    '-lwebsockets',
     #'-no-as-needed',
     '-lssl',
     '-lcap'

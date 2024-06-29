@@ -61,9 +61,11 @@ RUN git clone https://github.com/warmcat/libwebsockets.git && \
      cd libwebsockets && \
      git checkout refs/tags/v4.3.3 && \
      cmake . -B build && \
-     cd build && make -j 4 && make install
+     cd build && make -j 8
 
 # Build
+ENV LIBRARY_PATH $LIBRARY_PATH:../libwebsockets/build/lib
+ENV C_INCLUDE_PATH $C_INCLUDE_PATH::../libwebsockets/include
 RUN make setup && make build
 
 # Start shootingstr
