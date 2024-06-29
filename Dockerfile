@@ -53,19 +53,15 @@ RUN wget ${MESON_PKG_URL} && \
 COPY ./src      /app/src
 COPY ./meson    /app/meson
 COPY ./Makefile /app/Makefile
+COPY ./libwebsockets /app/libwebsockets
 
 WORKDIR /app
 
-ENV CMAKE_C_FLAGS "-Wno-implicit-function-declaration -Wno-unused-parameter -Wno-pedantic"
-RUN git clone https://github.com/warmcat/libwebsockets.git && \
-     cd libwebsockets && \
-     git checkout refs/tags/v4.3.3 && \
-     cmake . -B build && \
-     cd build && make -j 8
+RUN make setup-libwebsockets
 
 # Build
-ENV LIBRARY_PATH $LIBRARY_PATH:../libwebsockets/build/lib
-ENV C_INCLUDE_PATH $C_INCLUDE_PATH::../libwebsockets/include
+ENV LIBRARY_PATH $LIBRARY_PATH:./libwebsockets/build/lib
+ENV C_INCLUDE_PATH $C_INCLUDE_PATH::./libwebsockets/include
 RUN make setup && make build
 
 # Start shootingstr

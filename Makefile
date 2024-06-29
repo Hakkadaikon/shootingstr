@@ -17,13 +17,9 @@ clean:
 		meson/subprojects/openssl-cmake
 
 setup-libwebsockets:
-     git clone https://github.com/warmcat/libwebsockets.git
-     cd libwebsockets
-     git checkout refs/tags/v4.3.3
-     ENV CMAKE_C_FLAGS="-Wno-implicit-function-declaration -Wno-unused-parameter -Wno-pedantic"
-     cmake . -B build && \
-     cd build && 
-     make -j 8
+     CMAKE_C_FLAGS="-Wno-implicit-function-declaration -Wno-unused-parameter -Wno-pedantic"
+     cmake . -B build
+     cd build && make -j 8
 
 setup: clean
 	meson setup meson build
