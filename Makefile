@@ -26,7 +26,7 @@ docker-prune:
 	docker system prune --volumes
 
 docker-build:
-	docker build . | tee build.log
+	DOCKER_BUILDKIT=1 docker build . | tee build.log
 
 # format (use clang)
 format:
