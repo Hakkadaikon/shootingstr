@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN --mount=type=cache,target=/var/lib/apt/lists \
     --mount=type=cache,target=/var/cache/apt \
     apt-get -y update && \
-    apt-get -y install --no-install-recommends make wget zip unzip git libc6-dev dpkg-dev ca-certificates libssl-dev openssl
+    apt-get -y install --no-install-recommends make wget zip unzip git libc6-dev dpkg-dev ca-certificates libssl-dev openssl libwebsockets-dev
 
 # Set default gcc
 ARG GCC=gcc-14
@@ -48,12 +48,12 @@ RUN wget ${MESON_PKG_URL} && \
     dpkg -i $(basename ${MESON_PKG_URL}) && \
     rm $(basename ${MESON_PKG_URL})
 
-WORKDIR /app
-
 # Copy source files
 COPY ./src      /app/src
 COPY ./meson    /app/meson
 COPY ./Makefile /app/Makefile
+
+WORKDIR /app
 
 # Build
 RUN make setup && make build
