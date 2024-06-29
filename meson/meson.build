@@ -39,25 +39,7 @@ yyjson_dep = yyjson_subproject.dependency('yyjson')
 
 # libwebsockets install
 # -----------------------------------------------------------------
-libwebsockets_options = cmake.subproject_options()
-libwebsockets_options.add_cmake_defines({
-  'CMAKE_BUILD_TYPE': 'Release',
-  'CMAKE_C_COMPILER': 'gcc',
-  'LWS_WITH_SSL': 'ON',
-  'LWS_WITHOUT_TESTAPPS': 'ON',
-  'LWS_WITHOUT_TEST_SERVER': 'ON',
-  'LWS_WITHOUT_TEST_CLIENT': 'ON',
-  'LWS_WITH_NO_LOGS': 'ON',
-  'CMAKE_INSTALL_PREFIX': '/usr/include'
-})
-
-#'LWS_WITH_ZLIB': 'ON',
-#libwebsockets_subproject = cmake.subproject('libwebsockets', options: libwebsockets_options, dependencies: [libopenssl_dep])
-libwebsockets_subproject = cmake.subproject(
-  'libwebsockets',
-  options: libwebsockets_options
-)
-libwebsockets_dep = libwebsockets_subproject.dependency('websockets')
+libwebsockets_dep = dependency('libwebsockets')
 # -----------------------------------------------------------------
 
 sources = ['../src/main.c']
@@ -65,6 +47,9 @@ sources = ['../src/main.c']
 executable(
   'shootingstr',
   sources,
+  c_args : [
+    '-Wno-unused-parameter'
+  ],
   link_args : [
     '-lwebsockets',
     #'-no-as-needed',
