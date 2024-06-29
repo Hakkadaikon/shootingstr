@@ -60,8 +60,6 @@ WORKDIR /app
 RUN make setup-libwebsockets
 
 # Build
-ENV LIBRARY_PATH $LIBRARY_PATH:./libwebsockets/build/lib
-ENV C_INCLUDE_PATH $C_INCLUDE_PATH::./libwebsockets/include
 RUN make setup && make build
 
 # Start shootingstr

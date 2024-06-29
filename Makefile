@@ -17,12 +17,11 @@ clean:
 		meson/subprojects/openssl-cmake
 
 setup-libwebsockets:
-     CMAKE_C_FLAGS="-Wno-implicit-function-declaration -Wno-unused-parameter -Wno-pedantic"
-     cmake . -B build
-     cd build && make -j 8
+	cmake -S libwebsockets -B libwebsockets/build
+	cd libwebsockets/build && $(MAKE) -j 8
 
 setup: clean
-	meson setup meson build
+	meson setup --libdir libwebsockets/bin/lib --includedir libwebsockets/include meson build
 
 build:
 	ninja -C build
