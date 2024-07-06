@@ -17,11 +17,11 @@
  */
 int main(int argc, char** argv)
 {
-     WebSocketInfo websocket;
+    WebSocketInfo websocket;
 
-     websocket.port = 8080;
-     websocket.gid  = -1;
-     websocket.uid  = -1;
+    websocket.port = 8080;
+    websocket.gid  = -1;
+    websocket.uid  = -1;
 
     if (websocket_init(&websocket) != ErrorCodeNone) {
         return 1;

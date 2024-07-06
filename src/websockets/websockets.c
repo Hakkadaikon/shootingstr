@@ -4,7 +4,7 @@
  */
 
 /*----------------------------------------------------------------------------*/
-/* Header                                                                     */
+/* Headers                                                                    */
 /*----------------------------------------------------------------------------*/
 #include "websockets.h"
 #include <libwebsockets.h>
@@ -32,8 +32,7 @@ static int callback_websockets(
     enum lws_callback_reasons reason,
     void*                     user,
     void*                     in,
-    size_t                    len
-);
+    size_t                    len);
 
 /*----------------------------------------------------------------------------*/
 /* Structs                                                                    */
@@ -77,8 +76,7 @@ static int callback_websockets(
     enum lws_callback_reasons reason,
     void*                     user,
     void*                     in,
-    size_t                    len
-)
+    size_t                    len)
 {
     switch (reason) {
         case LWS_CALLBACK_ESTABLISHED:
@@ -104,21 +102,20 @@ static int callback_websockets(
 /*----------------------------------------------------------------------------*/
 
 enum WEB_SOCKET_ERROR_CODE websocket_init(
-    PWebSocketInfo websocket
-)
+    PWebSocketInfo websocket)
 {
     if (websocket == NULL) {
         return ErrorCodeInvalidArgument;
     }
 
-    websocket->impl = malloc(sizeof(WebSocketInfoImpl));
+    websocket->impl         = malloc(sizeof(WebSocketInfoImpl));
     PWebSocketInfoImpl impl = websocket->impl;
 
     impl->info.port      = websocket->port;
     impl->info.protocols = protocols;
     impl->info.gid       = websocket->gid;
     impl->info.uid       = websocket->uid;
-    impl->context = lws_create_context(&impl->info);
+    impl->context        = lws_create_context(&impl->info);
 
     if (impl->context == NULL) {
         lwsl_err("lws_create_context failed\n");
@@ -132,8 +129,8 @@ enum WEB_SOCKET_ERROR_CODE websocket_init(
 void websocket_loop(PWebSocketInfo websocket)
 {
     if (
-        websocket == NULL || 
-        websocket->impl == NULL || 
+        websocket == NULL ||
+        websocket->impl == NULL ||
         websocket->impl->context == NULL) {
         return;
     }
@@ -147,8 +144,8 @@ void websocket_loop(PWebSocketInfo websocket)
 void websocket_deinit(PWebSocketInfo websocket)
 {
     if (
-        websocket == NULL || 
-        websocket->impl == NULL || 
+        websocket == NULL ||
+        websocket->impl == NULL ||
         websocket->impl->context == NULL) {
         return;
     }

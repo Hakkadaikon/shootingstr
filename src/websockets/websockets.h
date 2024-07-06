@@ -40,9 +40,9 @@ typedef struct _WebSocketInfoImpl WebSocketInfoImpl, *PWebSocketInfoImpl;
  * @brief websocket info
  */
 typedef struct _WebSocketInfo {
-    int port;
-    int uid;
-    int gid;
+    int                port;
+    int                uid;
+    int                gid;
     PWebSocketInfoImpl impl;
 } WebSocketInfo, *PWebSocketInfo;
 
