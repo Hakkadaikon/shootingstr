@@ -28,9 +28,6 @@ docker-prune:
 docker-build:
 	DOCKER_BUILDKIT=1 docker build --progress=plain .
 
-docker-run:
-	DOCKER_BUILDKIT=1 docker run
-
 # format (use clang)
 format:
 	@clang-format -i \

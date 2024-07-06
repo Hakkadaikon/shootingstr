@@ -7,8 +7,12 @@ You can run the example with the following command.
 * meson and ninja must be installed to run make setup/make build.
 
 ```bash
+# host
 make setup
 make build
+
+# docker
+docker compose up -d
 ```
 
 ## Dependency  
