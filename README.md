@@ -10,6 +10,7 @@ You can run the example with the following command.
 # host
 make setup
 make build
+build/shootingstr
 
 # docker
 docker compose up -d
