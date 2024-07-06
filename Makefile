@@ -23,10 +23,13 @@ build:
 	ninja -C build
 
 docker-prune:
-	docker system prune --volumes
+	yes | docker system prune --volumes
 
 docker-build:
-	DOCKER_BUILDKIT=1 docker build . | tee build.log
+	DOCKER_BUILDKIT=1 docker build --progress=plain .
+
+docker-run:
+	DOCKER_BUILDKIT=1 docker run
 
 # format (use clang)
 format:

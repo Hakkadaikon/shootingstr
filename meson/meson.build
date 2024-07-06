@@ -39,7 +39,29 @@ yyjson_dep = yyjson_subproject.dependency('yyjson')
 
 # libwebsockets install
 # -----------------------------------------------------------------
-libwebsockets_dep = dependency('libwebsockets')
+# libwebsockets_options = cmake.subproject_options()
+# libwebsockets_options.add_cmake_defines({
+#   'CMAKE_BUILD_TYPE': 'Release',
+#   'CMAKE_C_COMPILER': 'gcc',
+#   'LWS_WITH_SSL': 'ON',
+#   'LWS_WITHOUT_TESTAPPS': 'ON',
+#   'LWS_WITHOUT_TEST_SERVER': 'ON',
+#   'LWS_WITHOUT_TEST_SERVER_EXTPOLL': 'ON',
+#   'LWS_WITHOUT_TEST_CLIENT': 'ON',
+#   'LWS_WITHOUT_TEST_PING': 'ON',
+#   'LWS_WITHOUT_EXTENSIONS': 'ON',
+#   'LWS_WITH_STATIC': 'ON',
+#   'LWS_WITH_SHARED': 'OFF',
+#   'LWS_STATIC_PIC': 'ON',
+#   'LWS_INSTALL_LIB_DIR' : '/usr/local/lib/libwebsockets',
+#   'LWS_INSTALL_INCLUDE_DIR' : '/usr/include/libwebsockets',
+# })
+# 
+# libwebsockets_subproject = cmake.subproject(
+#   'libwebsockets',
+#   options: libwebsockets_options
+# )
+# libwebsockets_dep = libwebsockets_subproject.dependency('websockets')
 # -----------------------------------------------------------------
 
 sources = ['../src/main.c']
@@ -56,7 +78,8 @@ executable(
     '-lssl',
     '-lcap'
   ],
-  dependencies: [yyjson_dep, libwebsockets_dep],
+  #dependencies: [yyjson_dep, libwebsockets_dep],
+  dependencies: [yyjson_dep],
   install: false
 )
 # -----------------------------------------------------------------
