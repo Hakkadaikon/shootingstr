@@ -5,3 +5,5 @@ services:
     #restart: always
     environment:
       TZ: "Asia/Tokyo"
+    ports:
+      - 8080:8080
