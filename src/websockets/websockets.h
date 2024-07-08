@@ -13,19 +13,27 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 /*----------------------------------------------------------------------------*/
-/* Enums                                                                      */
+/* Types                                                                      */
 /*----------------------------------------------------------------------------*/
 
 /**
- * @brief error code
+ * @brief web socket error code
  */
 enum WEB_SOCKET_ERROR_CODE {
     ErrorCodeNone = 0,
     ErrorCodeInvalidArgument,
     ErrorCodeInitializeSocket
 };
+
+/**
+ * @brief Websocket callback.
+ *
+ * @param [in] data   [description]
+ */
+typedef int (*WebSocketCallback)(void* user, const char* data);
 
 /*----------------------------------------------------------------------------*/
 /* Structs                                                                    */
@@ -43,6 +51,7 @@ typedef struct _WebSocketInfo {
     int                port;
     int                uid;
     int                gid;
+    WebSocketCallback  callback;
     PWebSocketInfoImpl impl;
 } WebSocketInfo, *PWebSocketInfo;
 
@@ -73,5 +82,12 @@ void websocket_loop(PWebSocketInfo websocket);
  * @param [in] websocket [description]
  */
 void websocket_deinit(PWebSocketInfo websocket);
+
+/**
+ * @brief print
+ *
+ * @param [in] format [description]
+ */
+void websocket_printf(const char* format, ...);
 
 #endif

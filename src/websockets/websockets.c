@@ -21,8 +21,8 @@
  * @param [in] wsi    [description]
  * @param [in] reason [description]
  * @param [in] user   [description]
- * @param [in] in     [description]
- * @param [in] len    [description]
+ * @param [in] data   [description]
+ * @param [in] length [description]
  *
  * @return [description]
  * @retval value [return value description]
@@ -31,8 +31,8 @@ static int callback_websockets(
     struct lws*               wsi,
     enum lws_callback_reasons reason,
     void*                     user,
-    void*                     in,
-    size_t                    len);
+    void*                     data,
+    size_t                    length);
 
 /*----------------------------------------------------------------------------*/
 /* Structs                                                                    */
@@ -57,15 +57,31 @@ struct _WebSocketInfoImpl {
 /* Static variables                                                           */
 /*----------------------------------------------------------------------------*/
 
+/**
+ * @brief websocket protocols
+ * - char*                 name
+ * - lws_callback_function callback
+ * - size_t                per_session_data_size
+ * - size_t                rx_buffer_size
+ * - unsigned int          id
+ * - void*                 user
+ * - size_t                tx_packet_size
+ */
 static struct lws_protocols protocols[] = {
-    {
-        "websocket-protocol",
-        callback_websockets,
-        0,
-        4096,
-    },
-    {NULL, NULL, 0, 0} /* terminator */
+    {"websocket-protocol",
+     callback_websockets,
+     0,
+     4096,
+     0,
+     "user1",
+     4096},
+    {NULL, NULL, 0, 0, 0, NULL, 0} /* terminator */
 };
+
+/**
+ * @brief user callback
+ */
+static WebSocketCallback user_callback = NULL;
 
 /*----------------------------------------------------------------------------*/
 /* Static functions                                                           */
@@ -75,8 +91,8 @@ static int callback_websockets(
     struct lws*               wsi,
     enum lws_callback_reasons reason,
     void*                     user,
-    void*                     in,
-    size_t                    len)
+    void*                     data,
+    size_t                    length)
 {
     switch (reason) {
         case LWS_CALLBACK_ESTABLISHED:
@@ -84,7 +100,17 @@ static int callback_websockets(
             break;
 
         case LWS_CALLBACK_RECEIVE:
-            lwsl_user("Received data: %s\n", (char*)in);
+            if (user_callback == NULL) {
+                break;
+            }
+
+            char* char_data = (char*)data;
+            if (char_data[length - 1] == '\n') {
+                char_data[length - 1] = '\0';
+            } else {
+                char_data[length] = '\0';
+            }
+            user_callback(user, char_data);
             break;
 
         case LWS_CALLBACK_CLOSED:
@@ -104,7 +130,8 @@ static int callback_websockets(
 enum WEB_SOCKET_ERROR_CODE websocket_init(
     PWebSocketInfo websocket)
 {
-    if (websocket == NULL) {
+    if (websocket == NULL ||
+        websocket->callback == NULL) {
         return ErrorCodeInvalidArgument;
     }
 
@@ -116,6 +143,9 @@ enum WEB_SOCKET_ERROR_CODE websocket_init(
     impl->info.gid       = websocket->gid;
     impl->info.uid       = websocket->uid;
     impl->context        = lws_create_context(&impl->info);
+    user_callback        = websocket->callback;
+
+    lws_set_log_level(LLL_USER, NULL);
 
     if (impl->context == NULL) {
         lwsl_err("lws_create_context failed\n");
@@ -128,8 +158,7 @@ enum WEB_SOCKET_ERROR_CODE websocket_init(
 
 void websocket_loop(PWebSocketInfo websocket)
 {
-    if (
-        websocket == NULL ||
+    if (websocket == NULL ||
         websocket->impl == NULL ||
         websocket->impl->context == NULL) {
         return;
@@ -143,8 +172,7 @@ void websocket_loop(PWebSocketInfo websocket)
 
 void websocket_deinit(PWebSocketInfo websocket)
 {
-    if (
-        websocket == NULL ||
+    if (websocket == NULL ||
         websocket->impl == NULL ||
         websocket->impl->context == NULL) {
         return;
@@ -154,4 +182,15 @@ void websocket_deinit(PWebSocketInfo websocket)
     lws_context_destroy(websocket->impl->context);
     free(websocket->impl);
     websocket->impl = NULL;
+}
+
+void websocket_printf(const char* format, ...)
+{
+    va_list args;
+    char    buffer[256];
+
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    lwsl_user("%s", buffer);
+    va_end(args);
 }

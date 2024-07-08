@@ -6,6 +6,13 @@
 #include "websockets/websockets.h"
 #include <yyjson.h>
 
+int user_callback(void* user, const char* data)
+{
+    websocket_printf("test user_callback\n");
+    websocket_printf("user_callback data : [%s]", data);
+    return 0;
+}
+
 /**
  * @brief entry point
  *
@@ -19,9 +26,10 @@ int main(int argc, char** argv)
 {
     WebSocketInfo websocket;
 
-    websocket.port = 8080;
-    websocket.gid  = -1;
-    websocket.uid  = -1;
+    websocket.port     = 8080;
+    websocket.gid      = -1;
+    websocket.uid      = -1;
+    websocket.callback = user_callback;
 
     if (websocket_init(&websocket) != ErrorCodeNone) {
         return 1;
