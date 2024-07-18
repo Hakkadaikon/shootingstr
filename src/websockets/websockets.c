@@ -187,7 +187,7 @@ void websocket_deinit(PWebSocketInfo websocket)
 void websocket_printf(const char* format, ...)
 {
     va_list args;
-    char    buffer[256];
+    char    buffer[4096];
 
     va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
