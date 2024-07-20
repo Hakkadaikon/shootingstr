@@ -69,7 +69,7 @@ int user_callback(
             event_err = 1;
         }
         if (!yyjson_is_str(content_obj)) {
-            websocket_printf("EVENT error : content is not num\n");
+            websocket_printf("EVENT error : content is not str\n");
             event_err = 1;
         }
         if (!yyjson_is_arr(tags_obj)) {
@@ -77,7 +77,7 @@ int user_callback(
             event_err = 1;
         }
         if (!yyjson_is_str(sig_obj)) {
-            websocket_printf("EVENT error : sig is not num\n");
+            websocket_printf("EVENT error : sig is not str\n");
             event_err = 1;
         }
 
