@@ -6,10 +6,16 @@
 #include "websockets/websockets.h"
 #include <yyjson.h>
 
-int user_callback(void* user, const char* data)
+int user_callback(
+    void*          user,
+    const char*    data,
+    const int      write_buffer_len,
+    unsigned char* write_buffer)
 {
     websocket_printf("test user_callback\n");
     websocket_printf("user_callback data : [%s]", data);
+
+    snprintf((char*)write_buffer, write_buffer_len, "test reply");
     return 0;
 }
 

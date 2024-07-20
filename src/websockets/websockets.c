@@ -7,6 +7,7 @@
 /* Headers                                                                    */
 /*----------------------------------------------------------------------------*/
 #include "websockets.h"
+#include "../utils/compatibility.h"
 #include <libwebsockets.h>
 #include <string.h>
 #include <stdio.h>
@@ -94,6 +95,11 @@ static int callback_websockets(
     void*                     data,
     size_t                    length)
 {
+    const int     MAX_WRITE_BUFFER_LENGTH      = 4096;
+    const int     MAX_WRITE_BUFFER_DATA_LENGTH = MAX_WRITE_BUFFER_LENGTH - LWS_PRE;
+    unsigned char write_buffer[MAX_WRITE_BUFFER_LENGTH];
+    char*         char_data = (char*)data;
+
     switch (reason) {
         case LWS_CALLBACK_ESTABLISHED:
             lwsl_user("Connection established\n");
@@ -104,18 +110,28 @@ static int callback_websockets(
                 break;
             }
 
-            char* char_data = (char*)data;
             if (char_data[length - 1] == '\n') {
                 char_data[length - 1] = '\0';
             } else {
                 char_data[length] = '\0';
             }
-            user_callback(user, char_data);
+
+            memset(write_buffer, 0x00, sizeof(write_buffer));
+            unsigned char* p_write_data = &write_buffer[LWS_PRE];
+            user_callback(user, char_data, MAX_WRITE_BUFFER_DATA_LENGTH, p_write_data);
+
+            if (*p_write_data == 0) {
+                break;
+            }
+
+            size_t write_len = strnlen(p_write_data, MAX_WRITE_BUFFER_DATA_LENGTH);
+            lws_write(wsi, p_write_data, write_len, LWS_WRITE_TEXT);
             break;
 
         case LWS_CALLBACK_CLOSED:
             lwsl_user("Connection closed\n");
             break;
+
         default:
             break;
     }

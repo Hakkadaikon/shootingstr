@@ -70,7 +70,8 @@ executable(
   'shootingstr',
   sources,
   c_args : [
-    '-Wno-unused-parameter'
+    '-Wno-unused-parameter',
+    '-O3'
   ],
   link_args : [
     '-lwebsockets',

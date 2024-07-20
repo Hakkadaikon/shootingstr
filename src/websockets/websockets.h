@@ -31,9 +31,16 @@ enum WEB_SOCKET_ERROR_CODE {
 /**
  * @brief Websocket callback.
  *
- * @param [in] data   [description]
+ * @param [in]  user             [description]
+ * @param [in]  data             [description]
+ * @param [in]  write_buffer_len [description]
+ * @param [out] write_buffer     [description]
  */
-typedef int (*WebSocketCallback)(void* user, const char* data);
+typedef int (*WebSocketCallback)(
+    void*          user,
+    const char*    data,
+    const int      write_buffer_len,
+    unsigned char* write_buffer);
 
 /*----------------------------------------------------------------------------*/
 /* Structs                                                                    */
