@@ -95,8 +95,8 @@ static int callback_websockets(
     void*                     data,
     size_t                    length)
 {
-    const int     MAX_WRITE_BUFFER_LENGTH      = 4096;
-    const int     MAX_WRITE_BUFFER_DATA_LENGTH = MAX_WRITE_BUFFER_LENGTH - LWS_PRE;
+    const size_t  MAX_WRITE_BUFFER_LENGTH      = 4096;
+    const size_t  MAX_WRITE_BUFFER_DATA_LENGTH = MAX_WRITE_BUFFER_LENGTH - LWS_PRE;
     unsigned char write_buffer[MAX_WRITE_BUFFER_LENGTH];
     char*         char_data = (char*)data;
 
@@ -118,7 +118,7 @@ static int callback_websockets(
 
             memset(write_buffer, 0x00, sizeof(write_buffer));
             unsigned char* p_write_data = &write_buffer[LWS_PRE];
-            user_callback(user, char_data, MAX_WRITE_BUFFER_DATA_LENGTH, p_write_data);
+            user_callback(user, char_data, MAX_WRITE_BUFFER_DATA_LENGTH, (char*)p_write_data);
 
             if (*p_write_data == 0) {
                 break;

@@ -8,10 +8,10 @@
 #include <yyjson.h>
 
 int user_callback(
-    void*          user,
-    const char*    data,
-    const int      write_buffer_len,
-    unsigned char* write_buffer)
+    void*       user,
+    const char* data,
+    const int   max_write_buffer_len,
+    char*       write_buffer)
 {
     websocket_printf("user_callback data : [%s]", data);
 
@@ -51,11 +51,11 @@ int user_callback(
         }
 
         // Send OK message
-        snprintf((char*)write_buffer, write_buffer_len, "[\"OK\",\"%s\",true,\"\"]", sub_id);
+        snprintf(write_buffer, max_write_buffer_len, "[\"OK\",\"%s\",true,\"\"]", sub_id);
         goto FINALIZE;
     } else if (strstr(event_type, "CLOSE")) {
         // Send EOSE message
-        snprintf((char*)write_buffer, write_buffer_len, "[\"EOSE\",\"%s\"]", sub_id);
+        snprintf(write_buffer, max_write_buffer_len, "[\"EOSE\",\"%s\"]", sub_id);
         goto FINALIZE;
     }
 
