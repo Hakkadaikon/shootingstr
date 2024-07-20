@@ -13,7 +13,7 @@ int user_callback(
     const int   max_write_buffer_len,
     char*       write_buffer)
 {
-    websocket_printf("user_callback data : [%s]", data);
+    //websocket_printf("user_callback data : [%s]", data);
 
     size_t      len = strlen(data);
     yyjson_doc* doc = yyjson_read(data, len, 0);
