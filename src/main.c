@@ -34,31 +34,85 @@ int user_callback(
         goto FINALIZE;
     }
 
-    yyjson_val* sub_id_obj = yyjson_arr_get(root, 1);
-    if (!yyjson_is_str(sub_id_obj)) {
-        websocket_printf("sub_id is not str.\n");
-        goto FINALIZE;
-    }
-
     const char* event_type = yyjson_get_str(event_type_obj);
-    const char* sub_id     = yyjson_get_str(sub_id_obj);
 
     if (strstr(event_type, "EVENT")) {
-        yyjson_val* event_data = yyjson_arr_get(root, 2);
+        yyjson_val* event_data = yyjson_arr_get(root, 1);
         if (!yyjson_is_obj(event_data)) {
             websocket_printf("EVENT data is not json\n");
             goto FINALIZE;
         }
 
+        yyjson_val* id_obj         = yyjson_obj_get(event_data, "id");
+        yyjson_val* pubkey_obj     = yyjson_obj_get(event_data, "pubkey");
+        yyjson_val* created_at_obj = yyjson_obj_get(event_data, "created_at");
+        yyjson_val* kind_obj       = yyjson_obj_get(event_data, "kind");
+        yyjson_val* tags_obj       = yyjson_obj_get(event_data, "tags");
+        yyjson_val* content_obj    = yyjson_obj_get(event_data, "content");
+        yyjson_val* sig_obj        = yyjson_obj_get(event_data, "sig");
+
+        int event_err = 0;
+        if (!yyjson_is_str(id_obj)) {
+            websocket_printf("EVENT error : id is not str\n");
+            event_err = 1;
+        }
+        if (!yyjson_is_str(pubkey_obj)) {
+            websocket_printf("EVENT error : pubkey is not str\n");
+            event_err = 1;
+        }
+        if (!yyjson_is_num(created_at_obj)) {
+            websocket_printf("EVENT error : created_at is not num\n");
+            event_err = 1;
+        }
+        if (!yyjson_is_num(kind_obj)) {
+            websocket_printf("EVENT error : kind is not num\n");
+            event_err = 1;
+        }
+        if (!yyjson_is_str(content_obj)) {
+            websocket_printf("EVENT error : content is not num\n");
+            event_err = 1;
+        }
+        if (!yyjson_is_arr(tags_obj)) {
+            websocket_printf("EVENT error : tags is not array\n");
+            event_err = 1;
+        }
+        if (!yyjson_is_str(sig_obj)) {
+            websocket_printf("EVENT error : sig is not num\n");
+            event_err = 1;
+        }
+
+        const char* id       = yyjson_get_str(id_obj);
+        const char* accepted = (event_err == 0) ? "true" : "false";
+        const char* reason   = (event_err == 0) ? "" : "error: event data is broken";
+
         // Send OK message
-        snprintf(write_buffer, max_write_buffer_len, "[\"OK\",\"%s\",true,\"\"]", sub_id);
+        snprintf(write_buffer, max_write_buffer_len, "[\"OK\",\"%s\",%s,\"%s\"]", id, accepted, reason);
+        goto FINALIZE;
+    } else if (strstr(event_type, "REQ")) {
+        // get sub_id
+        yyjson_val* sub_id_obj = yyjson_arr_get(root, 1);
+        if (!yyjson_is_str(sub_id_obj)) {
+            websocket_printf("sub_id is not str.\n");
+            goto FINALIZE;
+        }
+        const char* sub_id = yyjson_get_str(sub_id_obj);
+
+        // Send EOSE message
+        snprintf(write_buffer, max_write_buffer_len, "[\"EOSE\",\"%s\"]", sub_id);
         goto FINALIZE;
     } else if (strstr(event_type, "CLOSE")) {
+        // get sub_id
+        yyjson_val* sub_id_obj = yyjson_arr_get(root, 1);
+        if (!yyjson_is_str(sub_id_obj)) {
+            websocket_printf("sub_id is not str.\n");
+            goto FINALIZE;
+        }
+        const char* sub_id = yyjson_get_str(sub_id_obj);
+
         // Send EOSE message
         snprintf(write_buffer, max_write_buffer_len, "[\"EOSE\",\"%s\"]", sub_id);
         goto FINALIZE;
     }
-
 FINALIZE:
     if (doc != NULL) {
         yyjson_doc_free(doc);
