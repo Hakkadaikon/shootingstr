@@ -64,7 +64,7 @@ yyjson_dep = yyjson_subproject.dependency('yyjson')
 # libwebsockets_dep = libwebsockets_subproject.dependency('websockets')
 # -----------------------------------------------------------------
 
-sources = ['../src/main.c', '../src/websockets/websockets.c']
+sources = ['../src/main.c', '../src/websockets/websockets.c', '../src/nostr/nostr.c']
 
 executable(
   'shootingstr',
