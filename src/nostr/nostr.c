@@ -9,9 +9,26 @@
 #include "nostr.h"
 #include "../websockets/websockets.h"
 #include <libwebsockets.h>
+#include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 #include <yyjson.h>
+
+/*----------------------------------------------------------------------------*/
+/* Types                                                                      */
+/*----------------------------------------------------------------------------*/
+
+enum NOSTR_ERROR_CODE {
+    NostrErrorCodeNone = 0,
+    NostrErrorCodeEventDataIsNotJson,
+    NostrErrorCodeIdIsNotStr,
+    NostrErrorCodePubkeyIsNotStr,
+    NostrErrorCodeCreatedAtIsNotNum,
+    NostrErrorCodeKindIsNotNum,
+    NostrErrorCodeContentIsNotStr,
+    NostrErrorCodeTagIsNotArray,
+    NostrErrorCodeSigIsNotStr
+};
 
 /*----------------------------------------------------------------------------*/
 /* Prototype functions                                                        */
@@ -47,6 +64,79 @@ static int send_eose_message(
     return snprintf(write_buffer, max_write_buffer_len, "[\"EOSE\",\"%s\"]", sub_id);
 }
 
+static const char* error_to_string(const enum NOSTR_ERROR_CODE code)
+{
+    switch (code) {
+        case NostrErrorCodeNone:
+            return "";
+        case NostrErrorCodeEventDataIsNotJson:
+            return "Event Error : EVENT data is not json";
+        case NostrErrorCodeIdIsNotStr:
+            return "EVENT error : id is not str";
+        case NostrErrorCodePubkeyIsNotStr:
+            return "EVENT error : pubkey is not str";
+        case NostrErrorCodeCreatedAtIsNotNum:
+            return "EVENT error : created_at is not num";
+        case NostrErrorCodeKindIsNotNum:
+            return "EVENT error : kind is not num";
+        case NostrErrorCodeContentIsNotStr:
+            return "EVENT error : content is not str";
+        case NostrErrorCodeTagIsNotArray:
+            return "EVENT error : tags is not array";
+        case NostrErrorCodeSigIsNotStr:
+            return "EVENT error : sig is not str";
+        default:
+            return "Unknown error.";
+    }
+}
+
+static void set_nostr_error(const enum NOSTR_ERROR_CODE code, int* error)
+{
+    if (code == NostrErrorCodeNone) {
+        return;
+    }
+
+    websocket_printf("%s\n", error_to_string(code));
+    if (error != NULL) {
+        *error = 1;
+    }
+}
+
+static int validate_nostr_event(
+    yyjson_val* id_obj,
+    yyjson_val* pubkey_obj,
+    yyjson_val* created_at_obj,
+    yyjson_val* kind_obj,
+    yyjson_val* tags_obj,
+    yyjson_val* content_obj,
+    yyjson_val* sig_obj)
+{
+    int event_err = 0;
+    if (!yyjson_is_str(id_obj)) {
+        set_nostr_error(NostrErrorCodeIdIsNotStr, &event_err);
+    }
+    if (!yyjson_is_str(pubkey_obj)) {
+        set_nostr_error(NostrErrorCodePubkeyIsNotStr, &event_err);
+    }
+    if (!yyjson_is_num(created_at_obj)) {
+        set_nostr_error(NostrErrorCodeCreatedAtIsNotNum, &event_err);
+    }
+    if (!yyjson_is_num(kind_obj)) {
+        set_nostr_error(NostrErrorCodeKindIsNotNum, &event_err);
+    }
+    if (!yyjson_is_str(content_obj)) {
+        set_nostr_error(NostrErrorCodeContentIsNotStr, &event_err);
+    }
+    if (!yyjson_is_arr(tags_obj)) {
+        set_nostr_error(NostrErrorCodeTagIsNotArray, &event_err);
+    }
+    if (!yyjson_is_str(sig_obj)) {
+        set_nostr_error(NostrErrorCodeSigIsNotStr, &event_err);
+    }
+
+    return event_err;
+}
+
 static void nostr_callback_event(
     yyjson_val* root,
     const int   max_write_buffer_len,
@@ -55,6 +145,7 @@ static void nostr_callback_event(
     yyjson_val* event_data = yyjson_arr_get(root, 1);
     if (!yyjson_is_obj(event_data)) {
         websocket_printf("EVENT data is not json\n");
+        set_nostr_error(NostrErrorCodeEventDataIsNotJson, NULL);
         return;
     }
 
@@ -66,37 +157,23 @@ static void nostr_callback_event(
     yyjson_val* content_obj    = yyjson_obj_get(event_data, "content");
     yyjson_val* sig_obj        = yyjson_obj_get(event_data, "sig");
 
-    int event_err = 0;
-    if (!yyjson_is_str(id_obj)) {
-        websocket_printf("EVENT error : id is not str\n");
-        event_err = 1;
-    }
-    if (!yyjson_is_str(pubkey_obj)) {
-        websocket_printf("EVENT error : pubkey is not str\n");
-        event_err = 1;
-    }
-    if (!yyjson_is_num(created_at_obj)) {
-        websocket_printf("EVENT error : created_at is not num\n");
-        event_err = 1;
-    }
-    if (!yyjson_is_num(kind_obj)) {
-        websocket_printf("EVENT error : kind is not num\n");
-        event_err = 1;
-    }
-    if (!yyjson_is_str(content_obj)) {
-        websocket_printf("EVENT error : content is not str\n");
-        event_err = 1;
-    }
-    if (!yyjson_is_arr(tags_obj)) {
-        websocket_printf("EVENT error : tags is not array\n");
-        event_err = 1;
-    }
-    if (!yyjson_is_str(sig_obj)) {
-        websocket_printf("EVENT error : sig is not str\n");
-        event_err = 1;
-    }
+    int event_err = validate_nostr_event(
+        id_obj,
+        pubkey_obj,
+        created_at_obj,
+        kind_obj,
+        tags_obj,
+        content_obj,
+        sig_obj);
 
-    const char* id       = yyjson_get_str(id_obj);
+    const char*   id         = yyjson_get_str(id_obj);
+    const char*   pubkey     = yyjson_get_str(pubkey_obj);
+    const int64_t created_at = yyjson_get_sint(created_at_obj);
+    const int     kind       = yyjson_get_int(kind_obj);
+    const char*   content    = yyjson_get_str(content_obj);
+    const char*   sig        = yyjson_get_str(sig_obj);
+    //TODO: tags
+
     const char* accepted = (event_err == 0) ? "true" : "false";
     const char* reason   = (event_err == 0) ? "" : "error: event data is broken";
 
