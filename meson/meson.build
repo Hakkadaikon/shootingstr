@@ -64,6 +64,21 @@ yyjson_dep = yyjson_subproject.dependency('yyjson')
 # libwebsockets_dep = libwebsockets_subproject.dependency('websockets')
 # -----------------------------------------------------------------
 
+# rocksdb install
+# -----------------------------------------------------------------
+rocksdb_subproject = cmake.subproject(
+  'rocksdb',
+  cmake_options: [
+    '-DCMAKE_BUILD_TYPE=Release',
+    '-DBENCHMARK_ENABLE_GTEST_TESTS=0',
+    '-DWITH_GFLAGS=0',
+    '-DROCKSDB_BUILD_SHARED=0'
+  ],
+)
+
+rocksdb_dep = rocksdb_subproject.dependency('rocksdb')
+# -----------------------------------------------------------------
+
 sources = ['../src/main.c', '../src/websockets/websockets.c', '../src/nostr/nostr.c']
 
 executable(
@@ -80,7 +95,7 @@ executable(
     '-lcap'
   ],
   #dependencies: [yyjson_dep, libwebsockets_dep],
-  dependencies: [yyjson_dep],
+  dependencies: [yyjson_dep, rocksdb_dep],
   install: false
 )
 # -----------------------------------------------------------------
