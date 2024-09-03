@@ -66,24 +66,17 @@ yyjson_dep = yyjson_subproject.dependency('yyjson')
 
 # rocksdb install
 # -----------------------------------------------------------------
-rocksdb_subproject = cmake.subproject(
-  'rocksdb',
-  cmake_options: [
-    'build_by_default=false',
-    '-DCMAKE_BUILD_TYPE=Release',
-    '-DBENCHMARK_ENABLE_GTEST_TESTS=0',
-    '-DWITH_GFLAGS=0',
-    '-DROCKSDB_BUILD_SHARED=0'
-  ],
-)
-librocksdb_dep = rocksdb_subproject.dependency('rocksdb')
-#librocksdb_include = rocksdb_subproject.get_variable('include_directories')
-librocksdb_include = include_directories('./subprojects/rocksdb/include')
-#librocksdb = static_library(
+#rocksdb_subproject = cmake.subproject(
 #  'rocksdb',
-#  './librocksdb.a',
-#  install: false
+#  cmake_options: [
+#    'build_by_default=false',
+#    '-DCMAKE_BUILD_TYPE=Release',
+#    '-DBENCHMARK_ENABLE_GTEST_TESTS=0',
+#    '-DWITH_GFLAGS=0',
+#    '-DROCKSDB_BUILD_SHARED=0'
+#  ],
 #)
+#librocksdb_dep = rocksdb_subproject.dependency('rocksdb')
 # -----------------------------------------------------------------
 
 # executable
@@ -104,24 +97,14 @@ executable(
     #'-no-as-needed',
     '-lssl',
     '-lcap',
-    '-L.', # rocksdb
-    '-lrocksdb',
-    '-ldl',
-    '-lpthread',
-    '-lz',
-    '-lsnappy',
-    '-lbz2',
-    '-llz4',
-    '-lzstd'
+    '-lrocksdb'
   ],
   dependencies : [
   #  libwebsockets_dep,
   #  libopenssl_dep,
-     librocksdb_dep,
+  #  librocksdb_dep,
      yyjson_dep
   ],
-  #include_directories: librocksdb_include,
-  #link_with: librocksdb,
   install: false
 )
 # -----------------------------------------------------------------

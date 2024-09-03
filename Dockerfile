@@ -33,6 +33,7 @@ RUN \
     python3 \
     python3-pkg-resources \
     python3-setuptools \
+    librocksdb-dev \
     && \
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/${GCC} 99 && \
   update-alternatives --install /usr/bin/g++ g++ /usr/bin/${GPP} 99 && \
