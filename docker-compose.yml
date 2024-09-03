@@ -2,8 +2,6 @@ version: "3"
 services:
   relay:
     build: .
-    volumes:
-      - ./meson/librocksdb.a:/app/meson/librocksdb.a
     #restart: always
     environment:
       TZ: "Asia/Tokyo"
