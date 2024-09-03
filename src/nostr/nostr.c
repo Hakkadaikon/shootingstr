@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include "nostr_types.h"
 #include "nostr_validator.h"
+#include "nostr_storage.h"
 
 /*----------------------------------------------------------------------------*/
 /* Prototype functions                                                        */
@@ -85,6 +86,8 @@ static void nostr_callback_event(
         event.content    = GET_NOSTR_EVENT_CONTENT(obj.content);
         event.sig        = GET_NOSTR_EVENT_SIGNATURE(obj.sig);
         // event.tags    =  ??? TODO
+
+        save_nostr_event(&event);
     }
 
     const char* accepted = (event_err == 0) ? "true" : "false";
