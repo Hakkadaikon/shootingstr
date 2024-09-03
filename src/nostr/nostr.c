@@ -71,14 +71,21 @@ static void nostr_callback_event(
 
     int event_err = validate_nostr_event(&obj);
 
+    if (!IS_TYPE_NOSTR_EVENT_ID(obj.id)) {
+        return;
+    }
+
     NostrEvent event;
-    event.id         = GET_NOSTR_EVENT_ID(obj.id);
-    event.pubkey     = GET_NOSTR_EVENT_PUBLICKEY(obj.pubkey);
-    event.created_at = GET_NOSTR_EVENT_CREATED_AT(obj.created_at);
-    event.kind       = GET_NOSTR_EVENT_KIND(obj.kind);
-    event.content    = GET_NOSTR_EVENT_CONTENT(obj.content);
-    event.sig        = GET_NOSTR_EVENT_SIGNATURE(obj.sig);
-    // event.tags    =  ??? TODO
+
+    event.id = GET_NOSTR_EVENT_ID(obj.id);
+    if (!event_err) {
+        event.pubkey     = GET_NOSTR_EVENT_PUBLICKEY(obj.pubkey);
+        event.created_at = GET_NOSTR_EVENT_CREATED_AT(obj.created_at);
+        event.kind       = GET_NOSTR_EVENT_KIND(obj.kind);
+        event.content    = GET_NOSTR_EVENT_CONTENT(obj.content);
+        event.sig        = GET_NOSTR_EVENT_SIGNATURE(obj.sig);
+        // event.tags    =  ??? TODO
+    }
 
     const char* accepted = (event_err == 0) ? "true" : "false";
     const char* reason   = (event_err == 0) ? "" : "error: event data is broken";
