@@ -12,10 +12,16 @@
 #include <string.h>
 #include <stdio.h>
 #include "nostr_types.h"
+#include "nostr_validator.h"
 
 /*----------------------------------------------------------------------------*/
 /* Prototype functions                                                        */
 /*----------------------------------------------------------------------------*/
+
+typedef void (*NOSTR_CALLBACK)(
+    PNOSTR_OBJ root,
+    const int  max_write_buffer_len,
+    char*      write_buffer);
 
 /*----------------------------------------------------------------------------*/
 /* Static variables                                                           */
@@ -43,73 +49,6 @@ static int send_eose_message(
     return snprintf(write_buffer, max_write_buffer_len, "[\"EOSE\",\"%s\"]", sub_id);
 }
 
-static const char* error_to_string(const enum NOSTR_ERROR_CODE code)
-{
-    switch (code) {
-        case NostrErrorCodeNone:
-            return "";
-        case NostrErrorCodeEventDataIsNotJson:
-            return "Event Error : EVENT data is not json";
-        case NostrErrorCodeIdIsNotStr:
-            return "EVENT error : id is not str";
-        case NostrErrorCodePubkeyIsNotStr:
-            return "EVENT error : pubkey is not str";
-        case NostrErrorCodeCreatedAtIsNotNum:
-            return "EVENT error : created_at is not num";
-        case NostrErrorCodeKindIsNotNum:
-            return "EVENT error : kind is not num";
-        case NostrErrorCodeContentIsNotStr:
-            return "EVENT error : content is not str";
-        case NostrErrorCodeTagIsNotArray:
-            return "EVENT error : tags is not array";
-        case NostrErrorCodeSigIsNotStr:
-            return "EVENT error : sig is not str";
-        default:
-            return "Unknown error.";
-    }
-}
-
-static void set_nostr_error(const enum NOSTR_ERROR_CODE code, int* error)
-{
-    if (code == NostrErrorCodeNone) {
-        return;
-    }
-
-    websocket_printf("%s\n", error_to_string(code));
-    if (error != NULL) {
-        *error = 1;
-    }
-}
-
-static int validate_nostr_event(
-    const PNostrEventObj obj)
-{
-    int event_err = 0;
-    if (!IS_TYPE_NOSTR_EVENT_ID(obj->id)) {
-        set_nostr_error(NostrErrorCodeIdIsNotStr, &event_err);
-    }
-    if (!IS_TYPE_NOSTR_EVENT_PUBLICKEY(obj->pubkey)) {
-        set_nostr_error(NostrErrorCodePubkeyIsNotStr, &event_err);
-    }
-    if (!IS_TYPE_NOSTR_EVENT_CREATED_AT(obj->created_at)) {
-        set_nostr_error(NostrErrorCodeCreatedAtIsNotNum, &event_err);
-    }
-    if (!IS_TYPE_NOSTR_EVENT_KIND(obj->kind)) {
-        set_nostr_error(NostrErrorCodeKindIsNotNum, &event_err);
-    }
-    if (!IS_TYPE_NOSTR_EVENT_CONTENT(obj->content)) {
-        set_nostr_error(NostrErrorCodeContentIsNotStr, &event_err);
-    }
-    if (!IS_TYPE_NOSTR_EVENT_TAGS(obj->tags)) {
-        set_nostr_error(NostrErrorCodeTagIsNotArray, &event_err);
-    }
-    if (!IS_TYPE_NOSTR_EVENT_SIGNATURE(obj->sig)) {
-        set_nostr_error(NostrErrorCodeSigIsNotStr, &event_err);
-    }
-
-    return event_err;
-}
-
 static void nostr_callback_event(
     PNOSTR_OBJ root,
     const int  max_write_buffer_len,
@@ -117,8 +56,7 @@ static void nostr_callback_event(
 {
     PNOSTR_OBJ event_data = GET_OBJ_NOSTR_MESSAGE_EVENT(root);
     if (!IS_TYPE_NOSTR_MESSAGE_EVENT(event_data)) {
-        websocket_printf("EVENT data is not json\n");
-        set_nostr_error(NostrErrorCodeEventDataIsNotJson, NULL);
+        set_nostr_error("EVENT data is not json");
         return;
     }
 
@@ -186,6 +124,27 @@ static void nostr_callback_close(
     return;
 }
 
+static void nostr_callback_unknown(
+    PNOSTR_OBJ root,
+    const int  max_write_buffer_len,
+    char*      write_buffer)
+{
+    websocket_printf("Unknown event type\n");
+}
+
+static enum NostrMessageType get_nostr_message_type(const char* type_str)
+{
+    if (strstr(type_str, "EVENT")) {
+        return NostrMessageTypeEvent;
+    } else if (strstr(event_type, "REQ")) {
+        return NostrMessageTypeReq;
+    } else if (strstr(event_type, "CLOSE")) {
+        return NostrMessageTypeClose;
+    }
+
+    return NostrMessageTypeUnknown;
+}
+
 /*----------------------------------------------------------------------------*/
 /* Functions                                                                  */
 /*----------------------------------------------------------------------------*/
@@ -214,15 +173,16 @@ int nostr_callback(
         goto FINALIZE;
     }
 
-    const NOSTR_MESSAGE_TYPE event_type = GET_NOSTR_MESSAGE_TYPE(event_type_obj);
+    const enum NostrMessageType event_type =
+        get_nostr_message_type(GET_NOSTR_MESSAGE_TYPE(event_type_obj));
 
-    if (strstr(event_type, "EVENT")) {
-        nostr_callback_event(root, max_write_buffer_len, write_buffer);
-    } else if (strstr(event_type, "REQ")) {
-        nostr_callback_req(root, max_write_buffer_len, write_buffer);
-    } else if (strstr(event_type, "CLOSE")) {
-        nostr_callback_close(root, max_write_buffer_len, write_buffer);
-    }
+    static NOSTR_CALLBACK callbacks[] = {
+        nostr_callback_event,
+        nostr_callback_req,
+        nostr_callback_close,
+        nostr_callback_unknown};
+
+    callbacks[event_type](root, max_write_buffer_len, write_buffer);
 
 FINALIZE:
     if (doc != NULL) {

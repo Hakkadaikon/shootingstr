@@ -16,16 +16,11 @@
 /* Types                                                                      */
 /*----------------------------------------------------------------------------*/
 
-enum NOSTR_ERROR_CODE {
-    NostrErrorCodeNone = 0,
-    NostrErrorCodeEventDataIsNotJson,
-    NostrErrorCodeIdIsNotStr,
-    NostrErrorCodePubkeyIsNotStr,
-    NostrErrorCodeCreatedAtIsNotNum,
-    NostrErrorCodeKindIsNotNum,
-    NostrErrorCodeContentIsNotStr,
-    NostrErrorCodeTagIsNotArray,
-    NostrErrorCodeSigIsNotStr
+enum NostrMessageType {
+    NostrMessageTypeEvent = 0,
+    NostrMessageTypeReq,
+    NostrMessageTypeClose,
+    NostrMessageTypeUnknown,
 };
 
 typedef yyjson_val NOSTR_OBJ, *PNOSTR_OBJ;
