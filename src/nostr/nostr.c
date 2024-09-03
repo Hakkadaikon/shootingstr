@@ -132,13 +132,13 @@ static void nostr_callback_unknown(
     websocket_printf("Unknown event type\n");
 }
 
-static enum NostrMessageType get_nostr_message_type(const char* type_str)
+static enum NostrMessageType string_to_message_type(const char* type_str)
 {
     if (strstr(type_str, "EVENT")) {
         return NostrMessageTypeEvent;
-    } else if (strstr(event_type, "REQ")) {
+    } else if (strstr(type_str, "REQ")) {
         return NostrMessageTypeReq;
-    } else if (strstr(event_type, "CLOSE")) {
+    } else if (strstr(type_str, "CLOSE")) {
         return NostrMessageTypeClose;
     }
 
@@ -174,7 +174,7 @@ int nostr_callback(
     }
 
     const enum NostrMessageType event_type =
-        get_nostr_message_type(GET_NOSTR_MESSAGE_TYPE(event_type_obj));
+        string_to_message_type(GET_NOSTR_MESSAGE_TYPE(event_type_obj));
 
     static NOSTR_CALLBACK callbacks[] = {
         nostr_callback_event,
