@@ -69,21 +69,32 @@ yyjson_dep = yyjson_subproject.dependency('yyjson')
 rocksdb_subproject = cmake.subproject(
   'rocksdb',
   cmake_options: [
+    'build_by_default=false',
     '-DCMAKE_BUILD_TYPE=Release',
     '-DBENCHMARK_ENABLE_GTEST_TESTS=0',
     '-DWITH_GFLAGS=0',
     '-DROCKSDB_BUILD_SHARED=0'
   ],
 )
-
-rocksdb_dep = rocksdb_subproject.dependency('rocksdb')
+librocksdb_dep = rocksdb_subproject.dependency('rocksdb')
+#librocksdb_include = rocksdb_subproject.get_variable('include_directories')
+librocksdb_include = include_directories('./subprojects/rocksdb/include')
+#librocksdb = static_library(
+#  'rocksdb',
+#  './librocksdb.a',
+#  install: false
+#)
 # -----------------------------------------------------------------
 
-sources = ['../src/main.c', '../src/websockets/websockets.c', '../src/nostr/nostr.c']
-
+# executable
+# -----------------------------------------------------------------
 executable(
   'shootingstr',
-  sources,
+  sources : [
+    '../src/main.c',
+    '../src/websockets/websockets.c',
+    '../src/nostr/nostr.c'
+  ],
   c_args : [
     '-Wno-unused-parameter',
     '-O3'
@@ -92,10 +103,25 @@ executable(
     '-lwebsockets',
     #'-no-as-needed',
     '-lssl',
-    '-lcap'
+    '-lcap',
+    '-L.', # rocksdb
+    '-lrocksdb',
+    '-ldl',
+    '-lpthread',
+    '-lz',
+    '-lsnappy',
+    '-lbz2',
+    '-llz4',
+    '-lzstd'
   ],
-  #dependencies: [yyjson_dep, libwebsockets_dep],
-  dependencies: [yyjson_dep, rocksdb_dep],
+  dependencies : [
+  #  libwebsockets_dep,
+  #  libopenssl_dep,
+     librocksdb_dep,
+     yyjson_dep
+  ],
+  #include_directories: librocksdb_include,
+  #link_with: librocksdb,
   install: false
 )
 # -----------------------------------------------------------------
