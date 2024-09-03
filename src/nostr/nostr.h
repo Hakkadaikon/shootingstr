@@ -22,6 +22,11 @@
 /*----------------------------------------------------------------------------*/
 /* Prototype functions                                                        */
 /*----------------------------------------------------------------------------*/
+
+int nostr_init();
+
+int nostr_deinit();
+
 int nostr_callback(
     const char* data,
     const int   max_write_buffer_len,

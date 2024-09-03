@@ -159,6 +159,16 @@ static enum NostrMessageType string_to_message_type(const char* type_str)
 /* Functions                                                                  */
 /*----------------------------------------------------------------------------*/
 
+int nostr_init()
+{
+    return nostr_storage_init();
+}
+
+int nostr_deinit()
+{
+    return nostr_storage_deinit();
+}
+
 int nostr_callback(
     const char* data,
     const int   max_write_buffer_len,

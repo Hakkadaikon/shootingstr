@@ -38,7 +38,14 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    if (nostr_init()) {
+        websocket_deinit(&websocket);
+        return 1;
+    }
+
     websocket_loop(&websocket);
+
+    nostr_deinit();
     websocket_deinit(&websocket);
     return 0;
 }

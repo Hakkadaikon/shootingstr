@@ -25,7 +25,17 @@
 /* Functions                                                                  */
 /*----------------------------------------------------------------------------*/
 
+int nostr_storage_init()
+{
+    return 0;
+}
+
 int save_nostr_event(PNostrEvent event)
+{
+    return 0;
+}
+
+int nostr_storage_deinit()
 {
     return 0;
 }
