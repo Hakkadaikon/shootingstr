@@ -5,7 +5,7 @@
 -copilot.log
 
 ### data ###
-./data/
+./data/nostrdb
 
 ### C ###
 # Prerequisites
