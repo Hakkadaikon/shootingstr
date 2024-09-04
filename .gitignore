@@ -4,6 +4,9 @@
 ### copilot ###
 -copilot.log
 
+### data ###
+./data/*
+
 ### C ###
 # Prerequisites
 *.d
@@ -132,5 +135,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+!.gitignore
 
 # End of https://www.toptal.com/developers/gitignore/api/c++,c,git,linux,windows
