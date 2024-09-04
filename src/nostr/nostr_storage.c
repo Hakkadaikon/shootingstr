@@ -40,8 +40,10 @@ int nostr_storage_init()
 
     char* err = NULL;
 
-    nostrdb = rocksdb_open(options, "nostrdb", &err);
+    // FIXME: dir path
+    nostrdb = rocksdb_open(options, "/app/data/nostrdb", &err);
     if (err != NULL) {
+        websocket_printf("db open error! reason : [%s]\n", err);
         rocksdb_free(err);
         nostr_storage_deinit();
         return 1;
@@ -66,8 +68,8 @@ int save_nostr_event(PNostrEvent event, char* raw_data)
     int ret = (err != NULL);
     if (ret) {
         websocket_printf("save error! reason : [%s]\n", err);
+        rocksdb_free(err);
     }
-    rocksdb_free(err);
 
     return ret;
 }

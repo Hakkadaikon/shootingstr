@@ -3,6 +3,8 @@ services:
   relay:
     build: .
     #restart: always
+    volumes:
+      - ./data:/app/data
     environment:
       TZ: "Asia/Tokyo"
     ports:
