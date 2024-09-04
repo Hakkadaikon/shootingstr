@@ -97,4 +97,6 @@ void websocket_deinit(PWebSocketInfo websocket);
  */
 void websocket_printf(const char* format, ...);
 
+void websocket_setsignal();
+
 #endif

@@ -175,6 +175,7 @@ int nostr_init()
 
 int nostr_deinit()
 {
+    websocket_printf("nostr deinit...\n");
     return nostr_storage_deinit();
 }
 

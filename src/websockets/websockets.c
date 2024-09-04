@@ -79,6 +79,8 @@ static struct lws_protocols protocols[] = {
     {NULL, NULL, 0, 0, 0, NULL, 0} /* terminator */
 };
 
+static int signaled = 0;
+
 /**
  * @brief user callback
  */
@@ -172,6 +174,11 @@ enum WEB_SOCKET_ERROR_CODE websocket_init(
     return ErrorCodeNone;
 }
 
+void websocket_setsignal()
+{
+    signaled = 1;
+}
+
 void websocket_loop(PWebSocketInfo websocket)
 {
     if (websocket == NULL ||
@@ -181,9 +188,11 @@ void websocket_loop(PWebSocketInfo websocket)
     }
 
     lwsl_user("Websocket loop...\n");
-    while (1) {
+    while (!signaled) {
         lws_service(websocket->impl->context, 1000);
     }
+
+    lwsl_user("signaled!\n");
 }
 
 void websocket_deinit(PWebSocketInfo websocket)
@@ -194,7 +203,7 @@ void websocket_deinit(PWebSocketInfo websocket)
         return;
     }
 
-    lwsl_user("deinit...\n");
+    lwsl_user("websocket deinit...\n");
     lws_context_destroy(websocket->impl->context);
     free(websocket->impl);
     websocket->impl = NULL;

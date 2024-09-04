@@ -5,7 +5,32 @@
 
 #include "websockets/websockets.h"
 #include "nostr/nostr.h"
-#include <yyjson.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
+
+/*----------------------------------------------------------------------------*/
+/* Static variables                                                           */
+/*----------------------------------------------------------------------------*/
+static WebSocketInfo websocket;
+
+/*----------------------------------------------------------------------------*/
+/* Functions                                                                  */
+/*----------------------------------------------------------------------------*/
+
+void signal_handle(int signal)
+{
+    switch (signal) {
+        case SIGHUP:
+        case SIGTERM:
+            websocket_setsignal();
+            break;
+
+        default:
+            break;
+    }
+}
 
 int user_callback(
     void*       user,
@@ -27,12 +52,16 @@ int user_callback(
  */
 int main(int argc, char** argv)
 {
-    WebSocketInfo websocket;
-
     websocket.port     = 8080;
     websocket.gid      = -1;
     websocket.uid      = -1;
     websocket.callback = user_callback;
+
+    if (
+        (signal(SIGTERM, signal_handle) == SIG_ERR) ||
+        (signal(SIGHUP, signal_handle) == SIG_ERR)) {
+        return 1;
+    }
 
     if (websocket_init(&websocket) != ErrorCodeNone) {
         return 1;
