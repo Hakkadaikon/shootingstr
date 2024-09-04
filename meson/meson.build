@@ -86,7 +86,8 @@ executable(
   sources : [
     '../src/main.c',
     '../src/websockets/websockets.c',
-    '../src/nostr/nostr.c'
+    '../src/nostr/nostr.c',
+    '../src/nostr/nostr_storage.c'
   ],
   c_args : [
     '-Wno-unused-parameter',

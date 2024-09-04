@@ -10,7 +10,6 @@
 /*----------------------------------------------------------------------------*/
 #include <stdint.h>
 #include <stdio.h>
-#include <rocksdb/c.h>
 #include "nostr_types.h"
 
 /*----------------------------------------------------------------------------*/
@@ -22,22 +21,13 @@
 /*----------------------------------------------------------------------------*/
 
 /*----------------------------------------------------------------------------*/
-/* Functions                                                                  */
+/* Prototype functions                                                        */
 /*----------------------------------------------------------------------------*/
 
-int nostr_storage_init()
-{
-    return 0;
-}
+int nostr_storage_init();
 
-int save_nostr_event(PNostrEvent event)
-{
-    return 0;
-}
+int save_nostr_event(PNostrEvent event, char* raw_data);
 
-int nostr_storage_deinit()
-{
-    return 0;
-}
+int nostr_storage_deinit();
 
 #endif

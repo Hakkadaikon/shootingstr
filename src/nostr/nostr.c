@@ -11,6 +11,7 @@
 #include <libwebsockets.h>
 #include <string.h>
 #include <stdio.h>
+#include <yyjson.h>
 #include "nostr_types.h"
 #include "nostr_validator.h"
 #include "nostr_storage.h"
@@ -70,7 +71,8 @@ static void nostr_callback_event(
     obj.content    = GET_OBJ_NOSTR_EVENT_CONTENT(event_data);
     obj.sig        = GET_OBJ_NOSTR_EVENT_SIGNATURE(event_data);
 
-    int event_err = validate_nostr_event(&obj);
+    const char* reason    = "";
+    int         event_err = validate_nostr_event(&obj);
 
     if (!IS_TYPE_NOSTR_EVENT_ID(obj.id)) {
         return;
@@ -87,11 +89,18 @@ static void nostr_callback_event(
         event.sig        = GET_NOSTR_EVENT_SIGNATURE(obj.sig);
         // event.tags    =  ??? TODO
 
-        save_nostr_event(&event);
+        char* raw_data = yyjson_val_write(event_data, YYJSON_WRITE_NOFLAG, NULL);
+        //websocket_printf("pubkey : %s data : %s\n", event.pubkey, raw_data);
+
+        if (save_nostr_event(&event, raw_data)) {
+            event_err = 1;
+            reason    = "failed save event data";
+        }
+    } else {
+        reason = "event data is broken";
     }
 
     const char* accepted = (event_err == 0) ? "true" : "false";
-    const char* reason   = (event_err == 0) ? "" : "error: event data is broken";
 
     send_ok_message(max_write_buffer_len, event.id, accepted, reason, write_buffer);
     return;
