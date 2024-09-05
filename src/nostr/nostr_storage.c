@@ -35,8 +35,10 @@ int nostr_storage_init()
 {
     options = rocksdb_options_create();
     rocksdb_options_set_create_if_missing(options, 1);
+    rocksdb_options_set_info_log_level(options, 4);
 
     write_options = rocksdb_writeoptions_create();
+    rocksdb_writeoptions_set_sync(write_options, 0);
 
     char* err = NULL;
     int   ret = 0;
