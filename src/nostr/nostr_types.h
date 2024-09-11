@@ -9,7 +9,6 @@
 /* Headers                                                                    */
 /*----------------------------------------------------------------------------*/
 #include <stdint.h>
-#include <stdio.h>
 #include <yyjson.h>
 #include "../utils/log.h"
 

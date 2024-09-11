@@ -7,8 +7,6 @@
 #include "nostr/nostr_types.h"
 #include "nostr/nostr.h"
 #include <signal.h>
-#include <stdlib.h>
-#include <signal.h>
 #include <unistd.h>
 
 /*----------------------------------------------------------------------------*/

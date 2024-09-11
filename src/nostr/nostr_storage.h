@@ -9,7 +9,6 @@
 /* Headers                                                                    */
 /*----------------------------------------------------------------------------*/
 #include <stdint.h>
-#include <stdio.h>
 #include <stdbool.h>
 #include "nostr_types.h"
 

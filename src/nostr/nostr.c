@@ -6,11 +6,9 @@
 /*----------------------------------------------------------------------------*/
 /* Headers                                                                    */
 /*----------------------------------------------------------------------------*/
+#include <stdio.h>
 #include "nostr.h"
 #include "../utils/compatibility.h"
-#include <string.h>
-#include <stdio.h>
-#include <yyjson.h>
 #include "nostr_types.h"
 #include "nostr_validator.h"
 #include "nostr_storage.h"
