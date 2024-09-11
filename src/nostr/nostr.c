@@ -20,7 +20,7 @@
 /* Prototype functions                                                        */
 /*----------------------------------------------------------------------------*/
 
-typedef void (*NOSTR_CALLBACK)(PNOSTR_OBJ root);
+typedef bool (*NOSTR_CALLBACK)(PNOSTR_OBJ root);
 
 /*----------------------------------------------------------------------------*/
 /* Static variables                                                           */
@@ -49,12 +49,12 @@ static bool send_eose_message(const NOSTR_MESSAGE_SUBSCRIPTION_ID sub_id)
     return websocket_write(buf, strnlen(buf, 4096));
 }
 
-static void nostr_callback_event(PNOSTR_OBJ root)
+static bool nostr_callback_event(PNOSTR_OBJ root)
 {
     PNOSTR_OBJ event_data = GET_OBJ_NOSTR_MESSAGE_EVENT(root);
     if (!IS_TYPE_NOSTR_MESSAGE_EVENT(event_data)) {
         set_nostr_error("EVENT data is not json");
-        return;
+        return false;
     }
 
     NostrEventObj obj;
@@ -70,7 +70,7 @@ static void nostr_callback_event(PNOSTR_OBJ root)
     bool        accepted = validate_nostr_event(&obj);
 
     if (!IS_TYPE_NOSTR_EVENT_ID(obj.id)) {
-        return;
+        return false;
     }
 
     NostrEvent event;
@@ -95,44 +95,42 @@ static void nostr_callback_event(PNOSTR_OBJ root)
         reason = "event data is broken";
     }
 
-    send_ok_message(event.id, accepted, reason);
-    return;
+    return send_ok_message(event.id, accepted, reason);
 }
 
-static void nostr_callback_req(PNOSTR_OBJ root)
+static bool nostr_callback_req(PNOSTR_OBJ root)
 {
     // get sub_id
     PNOSTR_OBJ sub_id_obj = GET_OBJ_NOSTR_MESSAGE_SUBSCRIPTION_ID(root);
     if (!IS_TYPE_NOSTR_MESSAGE_SUBSCRIPTION_ID(sub_id_obj)) {
         websocket_printf("sub_id is not str.\n");
-        return;
+        return false;
     }
     const NOSTR_MESSAGE_SUBSCRIPTION_ID sub_id =
         GET_NOSTR_MESSAGE_SUBSCRIPTION_ID(sub_id_obj);
 
-    send_eose_message(sub_id);
-    return;
+    return send_eose_message(sub_id);
 }
 
-static void nostr_callback_close(PNOSTR_OBJ root)
+static bool nostr_callback_close(PNOSTR_OBJ root)
 {
     // get sub_id
     PNOSTR_OBJ sub_id_obj = GET_OBJ_NOSTR_MESSAGE_SUBSCRIPTION_ID(root);
     if (!IS_TYPE_NOSTR_MESSAGE_SUBSCRIPTION_ID(sub_id_obj)) {
         websocket_printf("sub_id is not str.\n");
-        return;
+        return false;
     }
     const NOSTR_MESSAGE_SUBSCRIPTION_ID sub_id =
         GET_NOSTR_MESSAGE_SUBSCRIPTION_ID(sub_id_obj);
 
     // Send EOSE message
-    send_eose_message(sub_id);
-    return;
+    return send_eose_message(sub_id);
 }
 
-static void nostr_callback_unknown(PNOSTR_OBJ root)
+static bool nostr_callback_unknown(PNOSTR_OBJ root)
 {
     websocket_printf("Unknown event type\n");
+    return true;
 }
 
 static enum NostrMessageType string_to_message_type(const char* type_str)
@@ -165,22 +163,27 @@ bool nostr_deinit()
 
 bool nostr_callback(const char* data)
 {
-    size_t     len = strlen(data);
-    PNOSTR_DOC doc = GET_NOSTR_MESSAGE_DOC(data, len);
+    size_t     len        = strlen(data);
+    PNOSTR_DOC doc        = GET_NOSTR_MESSAGE_DOC(data, len);
+    bool       is_success = true;
+
     if (doc == NULL) {
         websocket_printf("yyjson_read failed.\n");
+        is_success = false;
         goto FINALIZE;
     }
 
     PNOSTR_OBJ root = GET_OBJ_NOSTR_MESSAGE_ROOT(doc);
     if (!IS_TYPE_NOSTR_MESSAGE_ROOT(root)) {
         websocket_printf("yyjson_get_root failed.\n");
+        is_success = false;
         goto FINALIZE;
     }
 
     PNOSTR_OBJ event_type_obj = GET_OBJ_NOSTR_MESSAGE_TYPE(root);
     if (!IS_TYPE_NOSTR_MESSAGE_TYPE(event_type_obj)) {
         websocket_printf("event type is not str.\n");
+        is_success = false;
         goto FINALIZE;
     }
 
@@ -193,12 +196,12 @@ bool nostr_callback(const char* data)
         nostr_callback_close,
         nostr_callback_unknown};
 
-    callbacks[event_type](root);
+    is_success = callbacks[event_type](root);
 
 FINALIZE:
     if (doc != NULL) {
         FREE_NOSTR_DOC(doc);
     }
 
-    return true;
+    return is_success;
 }
