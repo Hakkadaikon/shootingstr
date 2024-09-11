@@ -8,7 +8,6 @@
 /*----------------------------------------------------------------------------*/
 #include "nostr.h"
 #include "../websockets/websockets.h"
-//#include <libwebsockets.h>
 #include "../utils/compatibility.h"
 #include <string.h>
 #include <stdio.h>

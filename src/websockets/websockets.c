@@ -6,9 +6,8 @@
 /*----------------------------------------------------------------------------*/
 /* Headers                                                                    */
 /*----------------------------------------------------------------------------*/
-#include "websockets.h"
-#include "../utils/compatibility.h"
 #include <libwebsockets.h>
+#include "websockets.h"
 #include <string.h>
 #include <stdio.h>
 
