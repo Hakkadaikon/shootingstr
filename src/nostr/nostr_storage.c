@@ -10,7 +10,6 @@
 #include <rocksdb/c.h>
 #include "nostr_types.h"
 #include "nostr_storage.h"
-#include "../websockets/websockets.h"
 
 /*----------------------------------------------------------------------------*/
 /* Types                                                                      */
@@ -45,7 +44,7 @@ bool nostr_storage_init()
     // FIXME: dir path
     g_nostrdb = rocksdb_open(g_options, "/app/data/nostrdb", &err);
     if (err != NULL) {
-        websocket_printf("db open error! reason : [%s]\n", err);
+        nostr_logdump(LogKindError, "db open error! reason : [%s]\n", err);
         nostr_storage_deinit();
         is_success = false;
         rocksdb_free(err);
@@ -69,7 +68,7 @@ bool save_nostr_event(PNostrEvent event, char* raw_data)
 
     bool is_success = (err == NULL);
     if (!is_success) {
-        websocket_printf("save error! reason : [%s]\n", err);
+        nostr_logdump(LogKindError, "save error! reason : [%s]\n", err);
         rocksdb_free(err);
     }
 

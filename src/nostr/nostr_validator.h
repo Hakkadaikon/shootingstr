@@ -11,18 +11,17 @@
 
 #include <stdbool.h>
 #include "nostr_types.h"
-#include "../websockets/websockets.h"
 
 /*----------------------------------------------------------------------------*/
 /* Functions                                                                  */
 /*----------------------------------------------------------------------------*/
 
-void set_nostr_error(const char* reason)
+static void set_nostr_error(const char* reason)
 {
-    websocket_printf("Event error! reason : [%s]\n", reason);
+    nostr_logdump(LogKindError, "Event error! reason : [%s]\n", reason);
 }
 
-bool validate_nostr_event(const PNostrEventObj obj)
+static bool validate_nostr_event(const PNostrEventObj obj)
 {
     bool is_success = true;
 

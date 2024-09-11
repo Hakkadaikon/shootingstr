@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <yyjson.h>
+#include "../utils/log.h"
 
 /*----------------------------------------------------------------------------*/
 /* Types                                                                      */
@@ -108,5 +109,11 @@ typedef struct _NostrEvent {
     NOSTR_EVENT_SIGNATURE  sig;
     NOSTR_EVENT_TAGS       tags;
 } NostrEvent, *PNostrEvent;
+
+bool nostr_write(const char* buf, const size_t len);
+void nostr_logdump_callback(const enum LogKind kind, const char* str);
+
+#define nostr_logdump(kind, ...) \
+    logdump(kind, nostr_logdump_callback, __VA_ARGS__)
 
 #endif

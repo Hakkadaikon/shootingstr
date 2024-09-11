@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include "../utils/log.h"
 
 /*----------------------------------------------------------------------------*/
 /* Types                                                                      */
@@ -87,15 +88,13 @@ bool websocket_loop(PWebSocketInfo websocket);
  */
 bool websocket_deinit(PWebSocketInfo websocket);
 
-/**
- * @brief print
- *
- * @param [in] format [description]
- */
-void websocket_printf(const char* format, ...);
-
 void websocket_setsignal();
 
 bool websocket_write(const char* buf, const size_t len);
+
+void websocket_logdump_callback(const enum LogKind kind, const char* str);
+
+#define websocket_logdump(kind, ...) \
+    logdump(kind, websocket_logdump_callback, __VA_ARGS__)
 
 #endif

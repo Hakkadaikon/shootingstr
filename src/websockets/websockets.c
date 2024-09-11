@@ -109,7 +109,7 @@ static int callback_websockets(
 
     switch (reason) {
         case LWS_CALLBACK_ESTABLISHED:
-            lwsl_user("Connection established\n");
+            websocket_logdump(LogKindUser, "Connection established\n");
             break;
 
         case LWS_CALLBACK_RECEIVE:
@@ -127,7 +127,7 @@ static int callback_websockets(
             break;
 
         case LWS_CALLBACK_CLOSED:
-            lwsl_user("Connection closed\n");
+            websocket_logdump(LogKindUser, "Connection established\n");
             break;
 
         default:
@@ -141,8 +141,7 @@ static int callback_websockets(
 /* Functions                                                                  */
 /*----------------------------------------------------------------------------*/
 
-bool websocket_init(
-    PWebSocketInfo websocket)
+bool websocket_init(PWebSocketInfo websocket)
 {
     if (websocket == NULL ||
         websocket->callback == NULL) {
@@ -159,14 +158,15 @@ bool websocket_init(
     impl->context        = lws_create_context(&impl->info);
     user_callback        = websocket->callback;
 
-    lws_set_log_level(LLL_USER, NULL);
+    //lws_set_log_level(LLL_DEBUG | LLL_USER | LLL_ERR, NULL);
+    lws_set_log_level(LLL_USER | LLL_ERR, NULL);
 
     if (impl->context == NULL) {
-        lwsl_err("lws_create_context failed\n");
+        websocket_logdump(LogKindError, "lws_create_context failed\n");
         return false;
     }
 
-    lwsl_user("Starting server...\n");
+    websocket_logdump(LogKindUser, "Starting server...\n");
     return true;
 }
 
@@ -183,12 +183,12 @@ bool websocket_loop(PWebSocketInfo websocket)
         return false;
     }
 
-    lwsl_user("Websocket loop...\n");
+    websocket_logdump(LogKindUser, "Websocket loop...\n");
     while (!g_signaled) {
         lws_service(websocket->impl->context, 1000);
     }
 
-    lwsl_user("signaled!\n");
+    websocket_logdump(LogKindUser, "signaled!\n");
     return true;
 }
 
@@ -200,22 +200,28 @@ bool websocket_deinit(PWebSocketInfo websocket)
         return false;
     }
 
-    lwsl_user("websocket deinit...\n");
+    websocket_logdump(LogKindUser, "Websocket deinit...\n");
     lws_context_destroy(websocket->impl->context);
     free(websocket->impl);
     websocket->impl = NULL;
     return true;
 }
 
-void websocket_printf(const char* format, ...)
+void websocket_logdump_callback(const enum LogKind kind, const char* str)
 {
-    va_list args;
-    char    buffer[4096];
-
-    va_start(args, format);
-    vsnprintf(buffer, sizeof(buffer), format, args);
-    lwsl_user("%s", buffer);
-    va_end(args);
+    switch (kind) {
+        case LogKindDebug:
+            lwsl_debug(str);
+            break;
+        case LogKindUser:
+            lwsl_user(str);
+            break;
+        case LogKindError:
+            lwsl_err(str);
+            break;
+        default:
+            break;
+    }
 }
 
 bool websocket_write(const char* buf, const size_t len)
