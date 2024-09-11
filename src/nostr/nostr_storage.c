@@ -23,9 +23,9 @@
 /*----------------------------------------------------------------------------*/
 /* Static variables                                                           */
 /*----------------------------------------------------------------------------*/
-static rocksdb_t*              nostrdb       = NULL;
-static rocksdb_options_t*      options       = NULL;
-static rocksdb_writeoptions_t* write_options = NULL;
+static rocksdb_t*              g_nostrdb       = NULL;
+static rocksdb_options_t*      g_options       = NULL;
+static rocksdb_writeoptions_t* g_write_options = NULL;
 
 /*----------------------------------------------------------------------------*/
 /* Functions                                                                  */
@@ -33,17 +33,17 @@ static rocksdb_writeoptions_t* write_options = NULL;
 
 bool nostr_storage_init()
 {
-    options = rocksdb_options_create();
-    rocksdb_options_set_create_if_missing(options, 1);
-    rocksdb_options_set_info_log_level(options, 4);
+    g_options = rocksdb_options_create();
+    rocksdb_options_set_create_if_missing(g_options, 1);
+    rocksdb_options_set_info_log_level(g_options, 4);
 
-    write_options = rocksdb_writeoptions_create();
-    rocksdb_writeoptions_set_sync(write_options, 0);
+    g_write_options = rocksdb_writeoptions_create();
+    rocksdb_writeoptions_set_sync(g_write_options, 0);
 
     char* err        = NULL;
     bool  is_success = true;
     // FIXME: dir path
-    nostrdb = rocksdb_open(options, "/app/data/nostrdb", &err);
+    g_nostrdb = rocksdb_open(g_options, "/app/data/nostrdb", &err);
     if (err != NULL) {
         websocket_printf("db open error! reason : [%s]\n", err);
         nostr_storage_deinit();
@@ -59,8 +59,8 @@ bool save_nostr_event(PNostrEvent event, char* raw_data)
     char* err = NULL;
 
     rocksdb_put(
-        nostrdb,
-        write_options,
+        g_nostrdb,
+        g_write_options,
         event->id,
         strlen(event->id),
         raw_data,
@@ -78,16 +78,16 @@ bool save_nostr_event(PNostrEvent event, char* raw_data)
 
 bool nostr_storage_deinit()
 {
-    if (options != NULL) {
-        rocksdb_options_destroy(options);
+    if (g_options != NULL) {
+        rocksdb_options_destroy(g_options);
     }
 
-    if (write_options != NULL) {
-        rocksdb_writeoptions_destroy(write_options);
+    if (g_write_options != NULL) {
+        rocksdb_writeoptions_destroy(g_write_options);
     }
 
-    if (nostrdb != NULL) {
-        rocksdb_close(nostrdb);
+    if (g_nostrdb != NULL) {
+        rocksdb_close(g_nostrdb);
     }
 
     return true;
