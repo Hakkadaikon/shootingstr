@@ -34,11 +34,9 @@ void signal_handle(int signal)
 
 int user_callback(
     void*       user,
-    const char* data,
-    const int   max_write_buffer_len,
-    char*       write_buffer)
+    const char* data)
 {
-    return nostr_callback(data, max_write_buffer_len, write_buffer);
+    return nostr_callback(data);
 }
 
 /**
@@ -63,11 +61,11 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    if (websocket_init(&websocket) != ErrorCodeNone) {
+    if (!websocket_init(&websocket)) {
         return 1;
     }
 
-    if (nostr_init()) {
+    if (!nostr_init()) {
         websocket_deinit(&websocket);
         return 1;
     }

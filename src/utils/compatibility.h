@@ -8,7 +8,7 @@
 
 #include <stddef.h>
 
-static inline size_t strnlen(const unsigned char* str, size_t maxlen)
+static inline size_t strnlen(const unsigned char* str, const size_t maxlen)
 {
     size_t ii;
 

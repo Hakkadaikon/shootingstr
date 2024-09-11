@@ -10,6 +10,7 @@
 /*----------------------------------------------------------------------------*/
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "nostr_types.h"
 
 /*----------------------------------------------------------------------------*/
@@ -24,10 +25,10 @@
 /* Prototype functions                                                        */
 /*----------------------------------------------------------------------------*/
 
-int nostr_storage_init();
+bool nostr_storage_init();
 
-int save_nostr_event(PNostrEvent event, char* raw_data);
+bool save_nostr_event(PNostrEvent event, char* raw_data);
 
-int nostr_storage_deinit();
+bool nostr_storage_deinit();
 
 #endif

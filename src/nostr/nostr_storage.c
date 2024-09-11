@@ -31,7 +31,7 @@ static rocksdb_writeoptions_t* write_options = NULL;
 /* Functions                                                                  */
 /*----------------------------------------------------------------------------*/
 
-int nostr_storage_init()
+bool nostr_storage_init()
 {
     options = rocksdb_options_create();
     rocksdb_options_set_create_if_missing(options, 1);
@@ -40,21 +40,21 @@ int nostr_storage_init()
     write_options = rocksdb_writeoptions_create();
     rocksdb_writeoptions_set_sync(write_options, 0);
 
-    char* err = NULL;
-    int   ret = 0;
+    char* err        = NULL;
+    bool  is_success = true;
     // FIXME: dir path
     nostrdb = rocksdb_open(options, "/app/data/nostrdb", &err);
     if (err != NULL) {
         websocket_printf("db open error! reason : [%s]\n", err);
         nostr_storage_deinit();
-        ret = 1;
+        is_success = false;
+        rocksdb_free(err);
     }
 
-    rocksdb_free(err);
-    return ret;
+    return is_success;
 }
 
-int save_nostr_event(PNostrEvent event, char* raw_data)
+bool save_nostr_event(PNostrEvent event, char* raw_data)
 {
     char* err = NULL;
 
@@ -67,16 +67,16 @@ int save_nostr_event(PNostrEvent event, char* raw_data)
         strlen(raw_data),
         &err);
 
-    int ret = (err != NULL);
-    if (ret) {
+    bool is_success = (err == NULL);
+    if (!is_success) {
         websocket_printf("save error! reason : [%s]\n", err);
+        rocksdb_free(err);
     }
 
-    rocksdb_free(err);
-    return ret;
+    return is_success;
 }
 
-int nostr_storage_deinit()
+bool nostr_storage_deinit()
 {
     if (options != NULL) {
         rocksdb_options_destroy(options);
@@ -90,5 +90,5 @@ int nostr_storage_deinit()
         rocksdb_close(nostrdb);
     }
 
-    return 0;
+    return true;
 }

@@ -8,7 +8,8 @@
 /*----------------------------------------------------------------------------*/
 #include "nostr.h"
 #include "../websockets/websockets.h"
-#include <libwebsockets.h>
+//#include <libwebsockets.h>
+#include "../utils/compatibility.h"
 #include <string.h>
 #include <stdio.h>
 #include <yyjson.h>
@@ -20,10 +21,7 @@
 /* Prototype functions                                                        */
 /*----------------------------------------------------------------------------*/
 
-typedef void (*NOSTR_CALLBACK)(
-    PNOSTR_OBJ root,
-    const int  max_write_buffer_len,
-    char*      write_buffer);
+typedef void (*NOSTR_CALLBACK)(PNOSTR_OBJ root);
 
 /*----------------------------------------------------------------------------*/
 /* Static variables                                                           */
@@ -33,28 +31,26 @@ typedef void (*NOSTR_CALLBACK)(
 /* Static functions                                                           */
 /*----------------------------------------------------------------------------*/
 
-static int send_ok_message(
-    const int   max_write_buffer_len,
+static bool send_ok_message(
     const char* id,
-    const char* accepted,
-    const char* reason,
-    char*       write_buffer)
+    const bool  accepted,
+    const char* reason)
 {
-    return snprintf(write_buffer, max_write_buffer_len, "[\"OK\",\"%s\",%s,\"%s\"]", id, accepted, reason);
+    char buf[4096];
+    snprintf(buf, 4096, "[\"OK\",\"%s\",%s,\"%s\"]", id, (accepted) ? "true" : "false", reason);
+
+    return websocket_write(buf, strnlen(buf, 4096));
 }
 
-static int send_eose_message(
-    const int                           max_write_buffer_len,
-    const NOSTR_MESSAGE_SUBSCRIPTION_ID sub_id,
-    char*                               write_buffer)
+static bool send_eose_message(const NOSTR_MESSAGE_SUBSCRIPTION_ID sub_id)
 {
-    return snprintf(write_buffer, max_write_buffer_len, "[\"EOSE\",\"%s\"]", sub_id);
+    char buf[4096];
+    snprintf(buf, 4096, "[\"EOSE\",\"%s\"]", sub_id);
+
+    return websocket_write(buf, strnlen(buf, 4096));
 }
 
-static void nostr_callback_event(
-    PNOSTR_OBJ root,
-    const int  max_write_buffer_len,
-    char*      write_buffer)
+static void nostr_callback_event(PNOSTR_OBJ root)
 {
     PNOSTR_OBJ event_data = GET_OBJ_NOSTR_MESSAGE_EVENT(root);
     if (!IS_TYPE_NOSTR_MESSAGE_EVENT(event_data)) {
@@ -71,8 +67,8 @@ static void nostr_callback_event(
     obj.content    = GET_OBJ_NOSTR_EVENT_CONTENT(event_data);
     obj.sig        = GET_OBJ_NOSTR_EVENT_SIGNATURE(event_data);
 
-    const char* reason    = "";
-    int         event_err = validate_nostr_event(&obj);
+    const char* reason   = "";
+    bool        accepted = validate_nostr_event(&obj);
 
     if (!IS_TYPE_NOSTR_EVENT_ID(obj.id)) {
         return;
@@ -81,7 +77,7 @@ static void nostr_callback_event(
     NostrEvent event;
 
     event.id = GET_NOSTR_EVENT_ID(obj.id);
-    if (!event_err) {
+    if (accepted) {
         event.pubkey     = GET_NOSTR_EVENT_PUBLICKEY(obj.pubkey);
         event.created_at = GET_NOSTR_EVENT_CREATED_AT(obj.created_at);
         event.kind       = GET_NOSTR_EVENT_KIND(obj.kind);
@@ -92,24 +88,19 @@ static void nostr_callback_event(
         char* raw_data = yyjson_val_write(event_data, YYJSON_WRITE_NOFLAG, NULL);
         //websocket_printf("pubkey : %s data : %s\n", event.pubkey, raw_data);
 
-        if (save_nostr_event(&event, raw_data)) {
-            event_err = 1;
-            reason    = "failed save event data";
+        if (!save_nostr_event(&event, raw_data)) {
+            accepted = false;
+            reason   = "failed save event data";
         }
     } else {
         reason = "event data is broken";
     }
 
-    const char* accepted = (event_err == 0) ? "true" : "false";
-
-    send_ok_message(max_write_buffer_len, event.id, accepted, reason, write_buffer);
+    send_ok_message(event.id, accepted, reason);
     return;
 }
 
-static void nostr_callback_req(
-    PNOSTR_OBJ root,
-    const int  max_write_buffer_len,
-    char*      write_buffer)
+static void nostr_callback_req(PNOSTR_OBJ root)
 {
     // get sub_id
     PNOSTR_OBJ sub_id_obj = GET_OBJ_NOSTR_MESSAGE_SUBSCRIPTION_ID(root);
@@ -120,14 +111,11 @@ static void nostr_callback_req(
     const NOSTR_MESSAGE_SUBSCRIPTION_ID sub_id =
         GET_NOSTR_MESSAGE_SUBSCRIPTION_ID(sub_id_obj);
 
-    send_eose_message(max_write_buffer_len, sub_id, write_buffer);
+    send_eose_message(sub_id);
     return;
 }
 
-static void nostr_callback_close(
-    PNOSTR_OBJ root,
-    const int  max_write_buffer_len,
-    char*      write_buffer)
+static void nostr_callback_close(PNOSTR_OBJ root)
 {
     // get sub_id
     PNOSTR_OBJ sub_id_obj = GET_OBJ_NOSTR_MESSAGE_SUBSCRIPTION_ID(root);
@@ -139,14 +127,11 @@ static void nostr_callback_close(
         GET_NOSTR_MESSAGE_SUBSCRIPTION_ID(sub_id_obj);
 
     // Send EOSE message
-    snprintf(write_buffer, max_write_buffer_len, "[\"EOSE\",\"%s\"]", sub_id);
+    send_eose_message(sub_id);
     return;
 }
 
-static void nostr_callback_unknown(
-    PNOSTR_OBJ root,
-    const int  max_write_buffer_len,
-    char*      write_buffer)
+static void nostr_callback_unknown(PNOSTR_OBJ root)
 {
     websocket_printf("Unknown event type\n");
 }
@@ -168,21 +153,18 @@ static enum NostrMessageType string_to_message_type(const char* type_str)
 /* Functions                                                                  */
 /*----------------------------------------------------------------------------*/
 
-int nostr_init()
+bool nostr_init()
 {
     return nostr_storage_init();
 }
 
-int nostr_deinit()
+bool nostr_deinit()
 {
     websocket_printf("nostr deinit...\n");
     return nostr_storage_deinit();
 }
 
-int nostr_callback(
-    const char* data,
-    const int   max_write_buffer_len,
-    char*       write_buffer)
+bool nostr_callback(const char* data)
 {
     size_t     len = strlen(data);
     PNOSTR_DOC doc = GET_NOSTR_MESSAGE_DOC(data, len);
@@ -212,12 +194,12 @@ int nostr_callback(
         nostr_callback_close,
         nostr_callback_unknown};
 
-    callbacks[event_type](root, max_write_buffer_len, write_buffer);
+    callbacks[event_type](root);
 
 FINALIZE:
     if (doc != NULL) {
         FREE_NOSTR_DOC(doc);
     }
 
-    return 0;
+    return true;
 }

@@ -68,7 +68,7 @@ struct _WebSocketInfoImpl {
  * - void*                 user
  * - size_t                tx_packet_size
  */
-static struct lws_protocols protocols[] = {
+static struct lws_protocols g_protocols[] = {
     {"websocket-protocol",
      callback_websockets,
      0,
@@ -79,12 +79,20 @@ static struct lws_protocols protocols[] = {
     {NULL, NULL, 0, 0, 0, NULL, 0} /* terminator */
 };
 
-static int signaled = 0;
+/**
+ * @brief [summary]
+ */
+static int g_signaled = 0;
+
+/**
+ * @brief [summary]
+ */
+static struct lws* g_wsi = NULL;
 
 /**
  * @brief user callback
  */
-static WebSocketCallback user_callback = NULL;
+static PWebSocketReceiveCallback user_callback = NULL;
 
 /*----------------------------------------------------------------------------*/
 /* Static functions                                                           */
@@ -97,10 +105,8 @@ static int callback_websockets(
     void*                     data,
     size_t                    length)
 {
-    const size_t  MAX_WRITE_BUFFER_LENGTH      = 4096;
-    const size_t  MAX_WRITE_BUFFER_DATA_LENGTH = MAX_WRITE_BUFFER_LENGTH - LWS_PRE;
-    unsigned char write_buffer[MAX_WRITE_BUFFER_LENGTH];
-    char*         char_data = (char*)data;
+    g_wsi           = wsi;
+    char* char_data = (char*)data;
 
     switch (reason) {
         case LWS_CALLBACK_ESTABLISHED:
@@ -118,16 +124,7 @@ static int callback_websockets(
                 char_data[length] = '\0';
             }
 
-            memset(write_buffer, 0x00, sizeof(write_buffer));
-            unsigned char* p_write_data = &write_buffer[LWS_PRE];
-            user_callback(user, char_data, MAX_WRITE_BUFFER_DATA_LENGTH, (char*)p_write_data);
-
-            if (*p_write_data == 0) {
-                break;
-            }
-
-            size_t write_len = strnlen(p_write_data, MAX_WRITE_BUFFER_DATA_LENGTH);
-            lws_write(wsi, p_write_data, write_len, LWS_WRITE_TEXT);
+            user_callback(user, char_data);
             break;
 
         case LWS_CALLBACK_CLOSED:
@@ -145,19 +142,19 @@ static int callback_websockets(
 /* Functions                                                                  */
 /*----------------------------------------------------------------------------*/
 
-enum WEB_SOCKET_ERROR_CODE websocket_init(
+bool websocket_init(
     PWebSocketInfo websocket)
 {
     if (websocket == NULL ||
         websocket->callback == NULL) {
-        return ErrorCodeInvalidArgument;
+        return false;
     }
 
     websocket->impl         = malloc(sizeof(WebSocketInfoImpl));
     PWebSocketInfoImpl impl = websocket->impl;
 
     impl->info.port      = websocket->port;
-    impl->info.protocols = protocols;
+    impl->info.protocols = g_protocols;
     impl->info.gid       = websocket->gid;
     impl->info.uid       = websocket->uid;
     impl->context        = lws_create_context(&impl->info);
@@ -167,46 +164,48 @@ enum WEB_SOCKET_ERROR_CODE websocket_init(
 
     if (impl->context == NULL) {
         lwsl_err("lws_create_context failed\n");
-        return ErrorCodeInitializeSocket;
+        return false;
     }
 
     lwsl_user("Starting server...\n");
-    return ErrorCodeNone;
+    return true;
 }
 
 void websocket_setsignal()
 {
-    signaled = 1;
+    g_signaled = 1;
 }
 
-void websocket_loop(PWebSocketInfo websocket)
+bool websocket_loop(PWebSocketInfo websocket)
 {
     if (websocket == NULL ||
         websocket->impl == NULL ||
         websocket->impl->context == NULL) {
-        return;
+        return false;
     }
 
     lwsl_user("Websocket loop...\n");
-    while (!signaled) {
+    while (!g_signaled) {
         lws_service(websocket->impl->context, 1000);
     }
 
     lwsl_user("signaled!\n");
+    return true;
 }
 
-void websocket_deinit(PWebSocketInfo websocket)
+bool websocket_deinit(PWebSocketInfo websocket)
 {
     if (websocket == NULL ||
         websocket->impl == NULL ||
         websocket->impl->context == NULL) {
-        return;
+        return false;
     }
 
     lwsl_user("websocket deinit...\n");
     lws_context_destroy(websocket->impl->context);
     free(websocket->impl);
     websocket->impl = NULL;
+    return true;
 }
 
 void websocket_printf(const char* format, ...)
@@ -218,4 +217,16 @@ void websocket_printf(const char* format, ...)
     vsnprintf(buffer, sizeof(buffer), format, args);
     lwsl_user("%s", buffer);
     va_end(args);
+}
+
+bool websocket_write(const char* buf, const size_t len)
+{
+    if (buf == NULL || len == 0) {
+        return false;
+    }
+
+    unsigned char write_buf[LWS_PRE + len];
+    memcpy(&write_buf[LWS_PRE], buf, len);
+    lws_write(g_wsi, &write_buf[LWS_PRE], len, LWS_WRITE_TEXT);
+    return true;
 }

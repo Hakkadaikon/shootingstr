@@ -10,6 +10,7 @@
 /* Headers                                                                    */
 /*----------------------------------------------------------------------------*/
 #include <stdio.h>
+#include <stdbool.h>
 
 /*----------------------------------------------------------------------------*/
 /* Types                                                                      */
@@ -23,13 +24,10 @@
 /* Prototype functions                                                        */
 /*----------------------------------------------------------------------------*/
 
-int nostr_init();
+bool nostr_init();
 
-int nostr_deinit();
+bool nostr_deinit();
 
-int nostr_callback(
-    const char* data,
-    const int   max_write_buffer_len,
-    char*       write_buffer);
+bool nostr_callback(const char* data);
 
 #endif

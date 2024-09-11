@@ -14,6 +14,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdbool.h>
 
 /*----------------------------------------------------------------------------*/
 /* Types                                                                      */
@@ -32,15 +33,11 @@ enum WEB_SOCKET_ERROR_CODE {
  * @brief Websocket callback.
  *
  * @param [in]  user             [description]
- * @param [in]  data             [description]
- * @param [in]  write_buffer_len [description]
- * @param [out] write_buffer     [description]
+ * @param [in]  received_data    [description]
  */
-typedef int (*WebSocketCallback)(
+typedef int (*PWebSocketReceiveCallback)(
     void*       user,
-    const char* data,
-    const int   max_write_buffer_len,
-    char*       write_buffer);
+    const char* received_data);
 
 /*----------------------------------------------------------------------------*/
 /* Structs                                                                    */
@@ -55,11 +52,11 @@ typedef struct _WebSocketInfoImpl WebSocketInfoImpl, *PWebSocketInfoImpl;
  * @brief websocket info
  */
 typedef struct _WebSocketInfo {
-    int                port;
-    int                uid;
-    int                gid;
-    WebSocketCallback  callback;
-    PWebSocketInfoImpl impl;
+    int                       port;
+    int                       uid;
+    int                       gid;
+    PWebSocketReceiveCallback callback;
+    PWebSocketInfoImpl        impl;
 } WebSocketInfo, *PWebSocketInfo;
 
 /*----------------------------------------------------------------------------*/
@@ -74,21 +71,21 @@ typedef struct _WebSocketInfo {
  * @return [description]
  * @retval value [return value description]
  */
-enum WEB_SOCKET_ERROR_CODE websocket_init(PWebSocketInfo websocket);
+bool websocket_init(PWebSocketInfo websocket);
 
 /**
  * @brief websocket loop
  *
  * @param [in] websocket [description]
  */
-void websocket_loop(PWebSocketInfo websocket);
+bool websocket_loop(PWebSocketInfo websocket);
 
 /**
  * @brief websocket deinit
  *
  * @param [in] websocket [description]
  */
-void websocket_deinit(PWebSocketInfo websocket);
+bool websocket_deinit(PWebSocketInfo websocket);
 
 /**
  * @brief print
@@ -98,5 +95,7 @@ void websocket_deinit(PWebSocketInfo websocket);
 void websocket_printf(const char* format, ...);
 
 void websocket_setsignal();
+
+bool websocket_write(const char* buf, const size_t len);
 
 #endif
