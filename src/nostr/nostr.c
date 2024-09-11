@@ -84,7 +84,7 @@ static void nostr_callback_event(PNOSTR_OBJ root)
         event.sig        = GET_NOSTR_EVENT_SIGNATURE(obj.sig);
         // event.tags    =  ??? TODO
 
-        char* raw_data = yyjson_val_write(event_data, YYJSON_WRITE_NOFLAG, NULL);
+        char* raw_data = GET_JSON_RAW_DATA(event_data);
         //websocket_printf("pubkey : %s data : %s\n", event.pubkey, raw_data);
 
         if (!save_nostr_event(&event, raw_data)) {

@@ -83,6 +83,8 @@ typedef char*   NOSTR_EVENT_TAGS;  //TODO
 #define IS_TYPE_NOSTR_EVENT_TAGS yyjson_is_arr
 //define GET_NOSTR_EVENT_TAGS TODO
 
+#define GET_JSON_RAW_DATA(OBJ) yyjson_val_write(OBJ, YYJSON_WRITE_NOFLAG, NULL)
+
 /*----------------------------------------------------------------------------*/
 /* Structs                                                                    */
 /*----------------------------------------------------------------------------*/
