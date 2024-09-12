@@ -113,6 +113,6 @@ bool nostr_write(const char* buf, const size_t len);
 void nostr_logdump_callback(const enum LogKind kind, const char* str);
 
 #define nostr_logdump(kind, ...) \
-    logdump(kind, nostr_logdump_callback, __VA_ARGS__)
+    logdump(kind, nostr_logdump_callback, __FILE__, __LINE__, __VA_ARGS__)
 
 #endif

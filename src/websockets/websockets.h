@@ -94,6 +94,6 @@ bool websocket_write(const char* buf, const size_t len);
 void websocket_logdump_callback(const enum LogKind kind, const char* str);
 
 #define websocket_logdump(kind, ...) \
-    logdump(kind, websocket_logdump_callback, __VA_ARGS__)
+    logdump(kind, websocket_logdump_callback, __FILE__, __LINE__, __VA_ARGS__)
 
 #endif
