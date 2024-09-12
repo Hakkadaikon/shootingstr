@@ -7,9 +7,10 @@
 /* Headers                                                                    */
 /*----------------------------------------------------------------------------*/
 
-#include "nostr_utils.h"
-#include "nostr_json_wrapper.h"
 #include "nostr_validator.h"
+
+#include "nostr_json_wrapper.h"
+#include "nostr_utils.h"
 
 /*----------------------------------------------------------------------------*/
 /* Functions                                                                  */
@@ -29,7 +30,7 @@ bool validate_nostr_event(const void* obj)
         nostr_logevterr("event pubkey is not string.");
         is_success = false;
     }
-    if (!IS_TYPE_NOSTR_EVENT_CREATED_AT(event_obj->created_at)) {
+    if (!IS_TYPE_NOSTR_EVENT_TIME(event_obj->created_at)) {
         nostr_logevterr("event created_at is not number.");
         is_success = false;
     }

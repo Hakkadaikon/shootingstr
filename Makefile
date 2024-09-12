@@ -40,8 +40,9 @@ format:
 			AllowShortFunctionsOnASingleLine: None,    \
 			AllowShortLoopsOnASingleLine: false,       \
 			BreakBeforeBraces: Linux,                  \
-			SortIncludes: false,                       \
+			SortIncludes: true,                        \
 			DerivePointerAlignment: false,             \
+			AlignConsecutiveMacros: true,              \
 			PointerAlignment: Left,                    \
 			AlignOperands: true,                       \
 		}"                                                 \

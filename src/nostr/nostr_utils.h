@@ -11,8 +11,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "nostr_types.h"
+
 #include "../utils/log.h"
+#include "nostr_types.h"
 
 typedef bool (*PNostrEventSendCallback)(const char* send_data, const size_t len);
 typedef void (*PNostrLogDumpCallback)(const enum LogKind kind, const char* str);

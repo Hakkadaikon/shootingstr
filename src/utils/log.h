@@ -6,8 +6,8 @@
 #ifndef _SHOOTING_STR_LOG_H_
 #define _SHOOTING_STR_LOG_H_
 
-#include <stddef.h>
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 
 enum LogKind {

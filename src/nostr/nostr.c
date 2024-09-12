@@ -6,14 +6,16 @@
 /*----------------------------------------------------------------------------*/
 /* Headers                                                                    */
 /*----------------------------------------------------------------------------*/
-#include <stdio.h>
 #include "nostr.h"
+
+#include <stdio.h>
+
 #include "../utils/compatibility.h"
+#include "nostr_json_wrapper.h"
+#include "nostr_storage.h"
 #include "nostr_types.h"
 #include "nostr_utils.h"
-#include "nostr_json_wrapper.h"
 #include "nostr_validator.h"
-#include "nostr_storage.h"
 
 /*----------------------------------------------------------------------------*/
 /* Prototype functions                                                        */
@@ -77,7 +79,7 @@ static bool nostr_callback_event(PNOSTR_OBJ root)
     event.id = GET_NOSTR_EVENT_ID(obj.id);
     if (accepted) {
         event.pubkey     = GET_NOSTR_EVENT_PUBLICKEY(obj.pubkey);
-        event.created_at = GET_NOSTR_EVENT_CREATED_AT(obj.created_at);
+        event.created_at = GET_NOSTR_EVENT_TIME(obj.created_at);
         event.kind       = GET_NOSTR_EVENT_KIND(obj.kind);
         event.content    = GET_NOSTR_EVENT_CONTENT(obj.content);
         event.sig        = GET_NOSTR_EVENT_SIGNATURE(obj.sig);
@@ -107,6 +109,7 @@ static bool nostr_callback_req(PNOSTR_OBJ root)
     const NOSTR_MESSAGE_SUBSCRIPTION_ID sub_id =
         GET_NOSTR_MESSAGE_SUBSCRIPTION_ID(sub_id_obj);
 
+    // TODO: request analyze
     return send_eose_message(sub_id);
 }
 

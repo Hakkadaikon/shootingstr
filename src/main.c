@@ -3,11 +3,12 @@
  * @brief entry point
  */
 
-#include "websockets/websockets.h"
-#include "nostr/nostr_utils.h"
-#include "nostr/nostr.h"
 #include <signal.h>
 #include <unistd.h>
+
+#include "nostr/nostr.h"
+#include "nostr/nostr_utils.h"
+#include "websockets/websockets.h"
 
 /*----------------------------------------------------------------------------*/
 /* Static variables                                                           */
