@@ -4,7 +4,7 @@
  */
 
 #include "websockets/websockets.h"
-#include "nostr/nostr_types.h"
+#include "nostr/nostr_utils.h"
 #include "nostr/nostr.h"
 #include <signal.h>
 #include <unistd.h>
@@ -36,12 +36,12 @@ static int websocket_callback(void* user, const char* data)
     return nostr_callback(data);
 }
 
-bool nostr_write(const char* buf, const size_t len)
+static bool nostr_event_send_callback(const char* buf, const size_t len)
 {
     return websocket_write(buf, len);
 }
 
-void nostr_logdump_callback(const enum LogKind kind, const char* str)
+static void nostr_logdump_callback(const enum LogKind kind, const char* str)
 {
     websocket_logdump(kind, str);
 }
@@ -72,6 +72,10 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    if (!nostr_utils_init(nostr_event_send_callback, nostr_logdump_callback)) {
+        websocket_deinit(&websocket);
+        return 1;
+    }
     if (!nostr_init()) {
         websocket_deinit(&websocket);
         return 1;

@@ -7,8 +7,10 @@
 /* Headers                                                                    */
 /*----------------------------------------------------------------------------*/
 #include <stdio.h>
+#include <string.h>
 #include <rocksdb/c.h>
 #include "nostr_types.h"
+#include "nostr_utils.h"
 #include "nostr_storage.h"
 
 /*----------------------------------------------------------------------------*/

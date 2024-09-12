@@ -16,6 +16,6 @@
 /* Functions                                                                  */
 /*----------------------------------------------------------------------------*/
 
-bool validate_nostr_event(const PNostrEventObj obj);
+bool validate_nostr_event(const void* obj);
 
 #endif

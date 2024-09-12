@@ -10,6 +10,8 @@
 #include "nostr.h"
 #include "../utils/compatibility.h"
 #include "nostr_types.h"
+#include "nostr_utils.h"
+#include "nostr_json_wrapper.h"
 #include "nostr_validator.h"
 #include "nostr_storage.h"
 
@@ -35,7 +37,7 @@ static bool send_ok_message(
     char buf[4096];
     snprintf(buf, 4096, "[\"OK\",\"%s\",%s,\"%s\"]", id, (accepted) ? "true" : "false", reason);
 
-    return nostr_write(buf, strnlen(buf, 4096));
+    return nostr_event_send(buf, strnlen(buf, 4096));
 }
 
 static bool send_eose_message(const NOSTR_MESSAGE_SUBSCRIPTION_ID sub_id)
@@ -43,7 +45,7 @@ static bool send_eose_message(const NOSTR_MESSAGE_SUBSCRIPTION_ID sub_id)
     char buf[4096];
     snprintf(buf, 4096, "[\"EOSE\",\"%s\"]", sub_id);
 
-    return nostr_write(buf, strnlen(buf, 4096));
+    return nostr_event_send(buf, strnlen(buf, 4096));
 }
 
 static bool nostr_callback_event(PNOSTR_OBJ root)
