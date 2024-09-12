@@ -225,7 +225,7 @@ void websocket_logdump_callback(const enum LogKind kind, const char* str)
     }
 }
 
-bool websocket_write(const char* buf, const size_t len)
+bool websocket_send(const char* buf, const size_t len)
 {
     if (buf == NULL || len == 0) {
         return false;

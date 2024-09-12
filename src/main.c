@@ -39,7 +39,7 @@ static int websocket_callback(void* user, const char* data)
 
 static bool nostr_event_send_callback(const char* buf, const size_t len)
 {
-    return websocket_write(buf, len);
+    return websocket_send(buf, len);
 }
 
 static void nostr_logdump_callback(const enum LogKind kind, const char* str)

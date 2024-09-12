@@ -90,7 +90,7 @@ bool websocket_deinit(PWebSocketInfo websocket);
 
 void websocket_setsignal();
 
-bool websocket_write(const char* buf, const size_t len);
+bool websocket_send(const char* buf, const size_t len);
 
 void websocket_logdump_callback(const enum LogKind kind, const char* str);
 
