@@ -31,7 +31,7 @@ static void signal_handle(int signal)
     }
 }
 
-static int user_callback(void* user, const char* data)
+static int websocket_callback(void* user, const char* data)
 {
     return nostr_callback(data);
 }
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     websocket.port     = 8080;
     websocket.gid      = -1;
     websocket.uid      = -1;
-    websocket.callback = user_callback;
+    websocket.callback = websocket_callback;
 
     if (
         (signal(SIGTERM, signal_handle) == SIG_ERR) ||

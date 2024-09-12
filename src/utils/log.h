@@ -20,16 +20,18 @@ typedef void (*PDumpCallback)(const enum LogKind kind, const char* str);
 
 static void logdump(
     const enum LogKind kind,
+    const int          max_buffer_size,
     PDumpCallback      callback,
     const char*        file_name,
     const int          file_line,
-    const char*        format, ...)
+    const char*        format,
+    ...)
 {
     va_list args;
-    char    format2[4096];
-    char    buffer[4096];
+    char    format2[max_buffer_size];
+    char    buffer[max_buffer_size];
 
-    snprintf(format2, 4096, "[%s:%d] %s", file_name, file_line, format);
+    snprintf(format2, max_buffer_size, "[%s:%d] %s", file_name, file_line, format);
     va_start(args, format2);
     vsnprintf(buffer, sizeof(buffer), format2, args);
     callback(kind, buffer);

@@ -113,6 +113,11 @@ bool nostr_write(const char* buf, const size_t len);
 void nostr_logdump_callback(const enum LogKind kind, const char* str);
 
 #define nostr_logdump(kind, ...) \
-    logdump(kind, nostr_logdump_callback, __FILE__, __LINE__, __VA_ARGS__)
+    logdump(kind, 4096, nostr_logdump_callback, __FILE__, __LINE__, __VA_ARGS__)
+
+static void nostr_logevterr(const char* reason)
+{
+    nostr_logdump(LogKindError, "Event error! reason : [%s]\n", reason);
+}
 
 #endif

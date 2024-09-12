@@ -27,7 +27,7 @@
  * @return [description]
  * @retval value [return value description]
  */
-static int callback_websockets(
+static int libwebsockets_callback(
     struct lws*               wsi,
     enum lws_callback_reasons reason,
     void*                     user,
@@ -69,7 +69,7 @@ struct _WebSocketInfoImpl {
  */
 static struct lws_protocols g_protocols[] = {
     {"websocket-protocol",
-     callback_websockets,
+     libwebsockets_callback,
      0,
      4096,
      0,
@@ -97,7 +97,7 @@ static PWebSocketReceiveCallback user_callback = NULL;
 /* Static functions                                                           */
 /*----------------------------------------------------------------------------*/
 
-static int callback_websockets(
+static int libwebsockets_callback(
     struct lws*               wsi,
     enum lws_callback_reasons reason,
     void*                     user,

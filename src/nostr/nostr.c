@@ -50,7 +50,7 @@ static bool nostr_callback_event(PNOSTR_OBJ root)
 {
     PNOSTR_OBJ event_data = GET_OBJ_NOSTR_MESSAGE_EVENT(root);
     if (!IS_TYPE_NOSTR_MESSAGE_EVENT(event_data)) {
-        set_nostr_error("EVENT data is not json");
+        nostr_logevterr("EVENT data is not json");
         return false;
     }
 
