@@ -28,7 +28,7 @@ docker compose up -d
     - [ ] ids
     - [ ] authors
     - [ ] kinds
-    - [ ] #<single-letter>
+    - [ ] \#\<single-letter\>
     - [ ] since
     - [ ] until
     - [ ] limit
