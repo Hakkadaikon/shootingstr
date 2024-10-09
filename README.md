@@ -16,6 +16,23 @@ build/shootingstr
 docker compose up -d
 ```
 
+## Features
+
+- [ ] NIP-01: Basic protocol flow description
+  - [x] Validating an EVENT (Tags not included)
+  - [x] Saving an EVENT (Tags not included)
+  - [ ] Validating an EVENT (Tags)
+  - [ ] Saving an EVENT (Tags)
+  - [x] Returning an OK message
+  - [ ] REQ Response
+    - [ ] ids
+    - [ ] authors
+    - [ ] kinds
+    - [ ] #<single-letter>
+    - [ ] since
+    - [ ] until
+    - [ ] limit
+
 ## Dependency  
 
 [libwebsockets](https://github.com/warmcat/libwebsockets) - C based websocket client  
