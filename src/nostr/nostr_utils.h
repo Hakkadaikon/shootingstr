@@ -19,7 +19,7 @@ typedef bool (*PNostrEventSendCallback)(const char* send_data, const size_t len)
 typedef void (*PNostrLogDumpCallback)(const enum LogKind kind, const char* str);
 
 /*----------------------------------------------------------------------------*/
-/* Types                                                                      */
+/* Prototype functions                                                        */
 /*----------------------------------------------------------------------------*/
 
 bool nostr_utils_init(

@@ -3,6 +3,9 @@
  * @brief entry point
  */
 
+/*----------------------------------------------------------------------------*/
+/* Headers                                                                    */
+/*----------------------------------------------------------------------------*/
 #include <signal.h>
 #include <unistd.h>
 
@@ -16,36 +19,17 @@
 static WebSocketInfo websocket;
 
 /*----------------------------------------------------------------------------*/
-/* Functions                                                                  */
+/* Prototype functions                                                        */
 /*----------------------------------------------------------------------------*/
 
-static void signal_handle(int signal)
-{
-    switch (signal) {
-        case SIGHUP:
-        case SIGTERM:
-            websocket_setsignal();
-            break;
+static void signal_handle(int signal);
+static int  websocket_callback(void* user, const char* data);
+static bool nostr_event_send_callback(const char* buf, const size_t len);
+static void nostr_logdump_callback(const enum LogKind kind, const char* str);
 
-        default:
-            break;
-    }
-}
-
-static int websocket_callback(void* user, const char* data)
-{
-    return nostr_callback(data);
-}
-
-static bool nostr_event_send_callback(const char* buf, const size_t len)
-{
-    return websocket_send(buf, len);
-}
-
-static void nostr_logdump_callback(const enum LogKind kind, const char* str)
-{
-    websocket_logdump(kind, str);
-}
+/*----------------------------------------------------------------------------*/
+/* Functions                                                                  */
+/*----------------------------------------------------------------------------*/
 
 /**
  * @brief entry point
@@ -87,4 +71,36 @@ int main(int argc, char** argv)
     nostr_deinit();
     websocket_deinit(&websocket);
     return 0;
+}
+
+/*----------------------------------------------------------------------------*/
+/* Static functions                                                           */
+/*----------------------------------------------------------------------------*/
+
+static void signal_handle(int signal)
+{
+    switch (signal) {
+        case SIGHUP:
+        case SIGTERM:
+            websocket_setsignal();
+            break;
+
+        default:
+            break;
+    }
+}
+
+static int websocket_callback(void* user, const char* data)
+{
+    return nostr_callback(data);
+}
+
+static bool nostr_event_send_callback(const char* buf, const size_t len)
+{
+    return websocket_send(buf, len);
+}
+
+static void nostr_logdump_callback(const enum LogKind kind, const char* str)
+{
+    websocket_logdump(kind, str);
 }

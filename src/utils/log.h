@@ -6,17 +6,26 @@
 #ifndef _SHOOTING_STR_LOG_H_
 #define _SHOOTING_STR_LOG_H_
 
+/*----------------------------------------------------------------------------*/
+/* Headers                                                                    */
+/*----------------------------------------------------------------------------*/
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
 
+/*----------------------------------------------------------------------------*/
+/* Types                                                                      */
+/*----------------------------------------------------------------------------*/
 enum LogKind {
     LogKindDebug,
     LogKindUser,
     LogKindError
 };
-
 typedef void (*PDumpCallback)(const enum LogKind kind, const char* str);
+
+/*----------------------------------------------------------------------------*/
+/* Functions                                                                  */
+/*----------------------------------------------------------------------------*/
 
 static void logdump(
     const enum LogKind kind,

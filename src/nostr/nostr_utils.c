@@ -11,11 +11,14 @@
 
 #include "../utils/compatibility.h"
 
+/*----------------------------------------------------------------------------*/
+/* Static variables                                                           */
+/*----------------------------------------------------------------------------*/
 static PNostrEventSendCallback g_event_send_callback;
 static PNostrLogDumpCallback   g_log_dump_callback;
 
 /*----------------------------------------------------------------------------*/
-/* Types                                                                      */
+/* Functions                                                                  */
 /*----------------------------------------------------------------------------*/
 
 bool nostr_utils_init(
