@@ -24,6 +24,11 @@
 /* Prototype functions                                                        */
 /*----------------------------------------------------------------------------*/
 
+bool nostr_callback_event(void* root);
+bool nostr_callback_req(void* root);
+bool nostr_callback_close(void* root);
+bool nostr_callback_unknown(void* root);
+
 bool nostr_init();
 
 bool nostr_deinit();

@@ -86,6 +86,10 @@ executable(
   sources : [
     '../src/main.c',
     '../src/nostr/nostr.c',
+    '../src/nostr/nostr_callback_req.c',
+    '../src/nostr/nostr_callback_event.c',
+    '../src/nostr/nostr_callback_close.c',
+    '../src/nostr/nostr_callback_unknown.c',
     '../src/nostr/nostr_storage.c',
     '../src/nostr/nostr_validator.c',
     '../src/nostr/nostr_utils.c',

@@ -14,13 +14,6 @@
 /* Types                                                                      */
 /*----------------------------------------------------------------------------*/
 
-enum NostrMessageType {
-    NostrMessageTypeEvent = 0,
-    NostrMessageTypeReq,
-    NostrMessageTypeClose,
-    NostrMessageTypeUnknown,
-};
-
 typedef char* NOSTR_MESSAGE_TYPE;
 typedef char* NOSTR_MESSAGE_SUBSCRIPTION_ID;
 
