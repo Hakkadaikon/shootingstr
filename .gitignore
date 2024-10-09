@@ -138,4 +138,9 @@ $RECYCLE.BIN/
 
 !.gitignore
 
+# Log / temp file
+*.log
+*.txt
+*.build
+
 # End of https://www.toptal.com/developers/gitignore/api/c++,c,git,linux,windows
